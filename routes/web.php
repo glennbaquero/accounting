@@ -999,7 +999,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('customer-bank-accounts/update/{id}', 'CustomerBankAccountController@update')->name('customer-bank-accounts.update');
 
             Route::post('customer-bank-accounts/{id}/archive', 'CustomerBankAccountController@archive')->name('customer-bank-accounts.archive');
-            Route::post('customer-bank-accounts/{id}/restore', 'CustomerBankAccountController@restore')->name('customer-bank-accounts.restore');\
+            Route::post('customer-bank-accounts/{id}/restore', 'CustomerBankAccountController@restore')->name('customer-bank-accounts.restore');
 
             Route::post('customer-bank-accounts/fetch', 'CustomerBankAccountFetchController@fetch')->name('customer-bank-accounts.fetch');
             Route::post('customer-bank-accounts/fetch?archived=1', 'CustomerBankAccountFetchController@fetch')->name('customer-bank-accounts.fetch-archive');
@@ -2245,7 +2245,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('deposits/approve/{id}', 'DepositController@approve')->name('deposits.approve');
 
             Route::post('deposits/{id}/archive', 'DepositController@archive')->name('deposits.archive');
-            Route::post('deposits/{id}/restore', 'DepositController@restore')->name('deposits.restore');\
+            Route::post('deposits/{id}/restore', 'DepositController@restore')->name('deposits.restore');
 
             Route::post('deposits/fetch', 'DepositFetchController@fetch')->name('deposits.fetch');
             Route::post('deposits/fetch?archived=1', 'DepositFetchController@fetch')->name('deposits.fetch-archive');
@@ -2263,7 +2263,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('vendor-payment-methods/approve/{id}', 'VendorPaymentMethodController@approve')->name('vendor-payment-methods.approve');
 
             Route::post('vendor-payment-methods/{id}/archive', 'VendorPaymentMethodController@archive')->name('vendor-payment-methods.archive');
-            Route::post('vendor-payment-methods/{id}/restore', 'VendorPaymentMethodController@restore')->name('vendor-payment-methods.restore');\
+            Route::post('vendor-payment-methods/{id}/restore', 'VendorPaymentMethodController@restore')->name('vendor-payment-methods.restore');
 
             Route::post('vendor-payment-methods/fetch', 'VendorPaymentMethodFetchController@fetch')->name('vendor-payment-methods.fetch');
             Route::post('vendor-payment-methods/fetch?archived=1', 'VendorPaymentMethodFetchController@fetch')->name('vendor-payment-methods.fetch-archive');
@@ -2281,7 +2281,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('customer-payment-methods/approve/{id}', 'CustomerPaymentMethodController@approve')->name('customer-payment-methods.approve');
 
             Route::post('customer-payment-methods/{id}/archive', 'CustomerPaymentMethodController@archive')->name('customer-payment-methods.archive');
-            Route::post('customer-payment-methods/{id}/restore', 'CustomerPaymentMethodController@restore')->name('customer-payment-methods.restore');\
+            Route::post('customer-payment-methods/{id}/restore', 'CustomerPaymentMethodController@restore')->name('customer-payment-methods.restore');
 
             Route::post('customer-payment-methods/fetch', 'CustomerPaymentMethodFetchController@fetch')->name('customer-payment-methods.fetch');
             Route::post('customer-payment-methods/fetch?archived=1', 'CustomerPaymentMethodFetchController@fetch')->name('customer-payment-methods.fetch-archive');
@@ -2299,7 +2299,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('checks/approve/{id}', 'CheckController@approve')->name('checks.approve');
 
             Route::post('checks/{id}/archive', 'CheckController@archive')->name('checks.archive');
-            Route::post('checks/{id}/restore', 'CheckController@restore')->name('checks.restore');\
+            Route::post('checks/{id}/restore', 'CheckController@restore')->name('checks.restore');
 
             Route::post('checks/fetch', 'CheckFetchController@fetch')->name('checks.fetch');
             Route::post('checks/fetch?archived=1', 'CheckFetchController@fetch')->name('checks.fetch-archive');
@@ -2318,7 +2318,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('letter-credit-purchases/amendment/{id}', 'LetterCreditPurchaseController@amendment')->name('letter-credit-purchases.amendment');
 
             Route::post('letter-credit-purchases/{id}/archive', 'LetterCreditPurchaseController@archive')->name('letter-credit-purchases.archive');
-            Route::post('letter-credit-purchases/{id}/restore', 'LetterCreditPurchaseController@restore')->name('letter-credit-purchases.restore');\
+            Route::post('letter-credit-purchases/{id}/restore', 'LetterCreditPurchaseController@restore')->name('letter-credit-purchases.restore');
 
             Route::post('letter-credit-purchases/fetch', 'LetterCreditPurchaseFetchController@fetch')->name('letter-credit-purchases.fetch');
             Route::post('letter-credit-purchases/fetch?archived=1', 'LetterCreditPurchaseFetchController@fetch')->name('letter-credit-purchases.fetch-archive');
@@ -2337,7 +2337,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('letter-credit-sales/amendment/{id}', 'LetterCreditSalesController@amendment')->name('letter-credit-sales.amendment');
 
             Route::post('letter-credit-sales/{id}/archive', 'LetterCreditSalesController@archive')->name('letter-credit-sales.archive');
-            Route::post('letter-credit-sales/{id}/restore', 'LetterCreditSalesController@restore')->name('letter-credit-sales.restore');\
+            Route::post('letter-credit-sales/{id}/restore', 'LetterCreditSalesController@restore')->name('letter-credit-sales.restore');
 
             Route::post('letter-credit-sales/fetch', 'LetterCreditSalesFetchController@fetch')->name('letter-credit-sales.fetch');
             Route::post('letter-credit-sales/fetch?archived=1', 'LetterCreditSalesFetchController@fetch')->name('letter-credit-sales.fetch-archive');
@@ -2353,7 +2353,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('bank-documents/update/{id}', 'BankDocumentController@update')->name('bank-documents.update');
 
             Route::post('bank-documents/{id}/archive', 'BankDocumentController@archive')->name('bank-documents.archive');
-            Route::post('bank-documents/{id}/restore', 'BankDocumentController@restore')->name('bank-documents.restore');\
+            Route::post('bank-documents/{id}/restore', 'BankDocumentController@restore')->name('bank-documents.restore');
 
             Route::post('bank-documents/fetch', 'BankDocumentFetchController@fetch')->name('bank-documents.fetch');
             Route::post('bank-documents/fetch?archived=1', 'BankDocumentFetchController@fetch')->name('bank-documents.fetch-archive');
@@ -2388,7 +2388,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('bank-facility-groups/update/{id}', 'BankFacilityGroupController@update')->name('bank-facility-groups.update');
 
             Route::post('bank-facility-groups/{id}/archive', 'BankFacilityGroupController@archive')->name('bank-facility-groups.archive');
-            Route::post('bank-facility-groups/{id}/restore', 'BankFacilityGroupController@restore')->name('bank-facility-groups.restore');\
+            Route::post('bank-facility-groups/{id}/restore', 'BankFacilityGroupController@restore')->name('bank-facility-groups.restore');
 
             Route::post('bank-facility-groups/fetch', 'BankFacilityGroupFetchController@fetch')->name('bank-facility-groups.fetch');
             Route::post('bank-facility-groups/fetch?archived=1', 'BankFacilityGroupFetchController@fetch')->name('bank-facility-groups.fetch-archive');
@@ -2404,7 +2404,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('bank-facility-types/update/{id}', 'BankFacilityTypeController@update')->name('bank-facility-types.update');
 
             Route::post('bank-facility-types/{id}/archive', 'BankFacilityTypeController@archive')->name('bank-facility-types.archive');
-            Route::post('bank-facility-types/{id}/restore', 'BankFacilityTypeController@restore')->name('bank-facility-types.restore');\
+            Route::post('bank-facility-types/{id}/restore', 'BankFacilityTypeController@restore')->name('bank-facility-types.restore');
 
             Route::post('bank-facility-types/fetch', 'BankFacilityTypeFetchController@fetch')->name('bank-facility-types.fetch');
             Route::post('bank-facility-types/fetch?archived=1', 'BankFacilityTypeFetchController@fetch')->name('bank-facility-types.fetch-archive');
@@ -2423,7 +2423,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('cash-register-transactions/match/{id}', 'CashflowTransactionController@match')->name('cashflow-transactions.match');
 
             Route::post('cash-register-transactions/{id}/archive', 'CashflowTransactionController@archive')->name('cashflow-transactions.archive');
-            Route::post('cash-register-transactions/{id}/restore', 'CashflowTransactionController@restore')->name('cashflow-transactions.restore');\
+            Route::post('cash-register-transactions/{id}/restore', 'CashflowTransactionController@restore')->name('cashflow-transactions.restore');
 
             Route::post('cash-register-transactions/fetch', 'CashflowTransactionFetchController@fetch')->name('cashflow-transactions.fetch');
             Route::post('cash-register-transactions/fetch?archived=1', 'CashflowTransactionFetchController@fetch')->name('cashflow-transactions.fetch-archive');
@@ -2447,7 +2447,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('bank-account-statements/approve/{id}', 'BankAccountStatementController@approve')->name('bank-account-statements.approve');
 
             Route::post('bank-account-statements/{id}/archive', 'BankAccountStatementController@archive')->name('bank-account-statements.archive');
-            Route::post('bank-account-statements/{id}/restore', 'BankAccountStatementController@restore')->name('bank-account-statements.restore');\
+            Route::post('bank-account-statements/{id}/restore', 'BankAccountStatementController@restore')->name('bank-account-statements.restore');
 
             Route::post('bank-account-statements/fetch', 'BankAccountStatementFetchController@fetch')->name('bank-account-statements.fetch');
             Route::post('bank-account-statements/fetch?archived=1', 'BankAccountStatementFetchController@fetch')->name('bank-account-statements.fetch-archive');
@@ -2463,7 +2463,7 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('bank-account-statement-lines/update/{id}', 'BankAccountStatementLineController@update')->name('bank-account-statement-lines.update');
 
             Route::post('bank-account-statement-lines/{id}/archive', 'BankAccountStatementLineController@archive')->name('bank-account-statement-lines.archive');
-            Route::post('bank-account-statement-lines/{id}/restore', 'BankAccountStatementLineController@restore')->name('bank-account-statement-lines.restore');\
+            Route::post('bank-account-statement-lines/{id}/restore', 'BankAccountStatementLineController@restore')->name('bank-account-statement-lines.restore');
             Route::post('bank-account-statement-lines/match/{id}', 'BankAccountStatementLineController@match')->name('bank-account-statement-lines.match');
 
             Route::post('bank-account-statement-lines/fetch', 'BankAccountStatementLineFetchController@fetch')->name('bank-account-statement-lines.fetch');
@@ -2540,7 +2540,7 @@ Route::middleware(['auth:web'])->group(function() {
                 Route::post('client-bank-accounts/update/{id}', 'ClientBankAccountController@update')->name('client-bank-accounts.update');
 
                 Route::post('client-bank-accounts/{id}/archive', 'ClientBankAccountController@archive')->name('client-bank-accounts.archive');
-                Route::post('client-bank-accounts/{id}/restore', 'ClientBankAccountController@restore')->name('client-bank-accounts.restore');\
+                Route::post('client-bank-accounts/{id}/restore', 'ClientBankAccountController@restore')->name('client-bank-accounts.restore');
 
                 Route::post('client-bank-accounts/fetch', 'ClientBankAccountFetchController@fetch')->name('client-bank-accounts.fetch');
                 Route::post('client-bank-accounts/fetch?archived=1', 'ClientBankAccountFetchController@fetch')->name('client-bank-accounts.fetch-archive');
@@ -2556,7 +2556,7 @@ Route::middleware(['auth:web'])->group(function() {
                 Route::post('bank-reasons/update/{id}', 'BankReasonController@update')->name('bank-reasons.update');
 
                 Route::post('bank-reasons/{id}/archive', 'BankReasonController@archive')->name('bank-reasons.archive');
-                Route::post('bank-reasons/{id}/restore', 'BankReasonController@restore')->name('bank-reasons.restore');\
+                Route::post('bank-reasons/{id}/restore', 'BankReasonController@restore')->name('bank-reasons.restore');
 
                 Route::post('bank-reasons/fetch', 'BankReasonFetchController@fetch')->name('bank-reasons.fetch');
                 Route::post('bank-reasons/fetch?archived=1', 'BankReasonFetchController@fetch')->name('bank-reasons.fetch-archive');

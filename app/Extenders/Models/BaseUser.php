@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Spatie\Activitylog\LogOptions;
 
 use Spatie\Activitylog\Traits\LogsActivity;
 use Laravel\Scout\Searchable;
@@ -304,5 +305,11 @@ class BaseUser extends Authenticatable
 
     protected function getDefaultImage() {
         return url('/') . '/images/avatar.png';
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults();
+        // Chain fluent methods for configuration options
     }
 }
