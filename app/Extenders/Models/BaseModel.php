@@ -4,6 +4,7 @@ namespace App\Extenders\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 use Laravel\Scout\Searchable;
 
 use App\Traits\ArchiveableTrait;
@@ -60,5 +61,11 @@ class BaseModel extends Model
         }
 
         return $result;
+    }
+    
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults();
+        // Chain fluent methods for configuration options
     }
 }
