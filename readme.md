@@ -15,12 +15,12 @@ This guide favors Ubuntu 20.4. For Windows user you can configure and enable [WS
 ~$ sudo apt update
 ~$ sudo apt install git
 ```
-2. PHP version ~7.4 & Composer ~1.x (Defer from using PHP v8 until further notice)
+2. PHP version ~8.2 & Composer ~2.x
 ```
 ~$ sudo apt update
 ~$ sudo apt dist-upgrade
 ~$ sudo apt install composer
-~$ composer self-update --1 # skip if composer is already v1
+~$ composer self-update
 ~$ sudo apt-get update 
 ~$ sudo apt install php-xml 
 ~$ sudo apt-get install php-sqlite3
@@ -34,7 +34,7 @@ This guide favors Ubuntu 20.4. For Windows user you can configure and enable [WS
 ```
 ~$ docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:8.0.22
 ```
-4. NodeJs > 10.x.x (version installed is v14.5.3)
+4. NodeJs > 10.x.x (version installed is v16.15.1)
 ```
 ~$ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh
 ~$ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
