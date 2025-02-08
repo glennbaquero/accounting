@@ -1,0 +1,695 @@
+<template>
+	<div>
+		<div class="row">
+			<div class="col-md-12 text-right">
+				<button type="button" @click="newLine" class="btn btn-success w-10" data-toggle="modal" data-target="#so-lines-modal" data-backdrop="static"><i class="fas fa-plus"></i> Create Sales Line</button>
+			</div>
+			<div class="col-md-6">
+				<div class="form-group">
+					<label>Total Quantity</label>
+					<input name="total_data_quantity" :value="totalQuantity" type="text"  readonly class="form-control">
+				</div>
+			</div>	
+			<div class="col-md-6">
+				<div class="form-group">
+					<label>Total Amount</label>
+					<input name="total_amount" :value="totalAmount | currency" type="text"  readonly class="form-control">
+				</div>
+			</div>	        		    
+		</div>
+		<div class="row">
+
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Subtotal Amount</label>
+					<input name="subtotal_amount" :value="subTotalAmount | currency" type="text"  readonly class="form-control mb-2">
+					<label>Total Discount</label>
+					<input name="total_discount" :value="totalDiscount | currency" type="text"  readonly class="form-control mb-2">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label>Total Round Off</label>
+					<input name="total_round_off" :value="totalRoundOff | currency" type="text"  readonly class="form-control mb-2">
+					<label>Cash Discount</label>
+					<input name="cash_discount" :value="totalCashDiscount | currency" type="text"  readonly class="form-control mb-2">
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="form-group">
+					<label> Total Charges</label>
+					<input name="total_charges"  type="text" :value="totalCharges | currency" readonly class="form-control mb-2">
+					<label>Total Sales Tax</label>
+					<input name="total_sales_tax" type="text" :value="totalSalesTax | currency" readonly class="form-control mb-2">
+				</div>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12">
+				
+				<data-table 
+					:key="data_table_key"
+					ref="data-table"
+					:headers="headers" 
+					:items="sales_order_lines"
+				>
+						<template v-slot:body="{ items }">
+						<tr v-for="(table_item, key) in items" v-bind:key="key">
+							<td>{{ table_item.sales_order_line_number }}</td>
+							<td>{{ table_item.product.product_number }}</td>
+							<td>{{ table_item.line_status }}</td>
+							<td>{{ table_item.product.name }}</td>
+							<td>{{ table_item.variant.name }}</td>
+							<td>{{ table_item.variant.size }}</td>
+							<td>{{ table_item.variant.color }}</td>
+							<td>{{ table_item.quantity }}</td>
+							<td>{{ table_item.variant.unit_price | currency }}</td>
+							<td>{{ table_item.amount | currency }}</td>
+							<td>
+								<template>
+									<button type="button" class="btn btn-info btn-sm" @click="editLine(key)">
+										<i class="fas fa-eye"></i>
+									</button>
+									<button type="button" class="btn btn-danger btn-sm" @click="removeLine(key)">
+										<i class="fas fa-trash"></i>
+									</button>
+								</template>
+							</td>
+						</tr>
+						</template>         
+				</data-table>
+			</div>
+		</div>
+                
+		<div class="modal fade"  id="so-lines-modal">
+			<form-request :submit-url="submitUrl" @load="load" @success="fetch" confirm-dialog sync-on-success>
+			<div class="modal-dialog modal-lg modal-dialog-centered">
+				<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Sales Order Line</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+					<div class="modal-body">
+						<div class="row">
+							<div class="col-md-2">
+								<div class="form-group">
+									<h4><i class="fas fa-info-circle"></i> Details</h4><hr>
+									<label>Client</label>
+									<input readonly class="form-control mb-2" v-model="client_name">
+									<label>Line Status <b class="text-danger">*</b></label>
+									<v-select class="mb-2" v-model="item.line_status" placeholder="Select Line Status" :options="line_statuses"></v-select>
+									<label>Sales Order Number</label>
+									<input readonly class="form-control mb-2" v-model="so.sales_order_number">
+									<label>Invoice Number</label>
+									<input readonly class="form-control mb-2" v-model="so.customer_invoice_number">
+									<label>Sales Order Line Number</label>
+									<input readonly class="form-control mb-2" v-model="item.sales_order_line_number">
+									<label>Customer Account</label>
+									<input readonly v-model="so.customer_account" class="form-control mb-2">
+									<label>Invoice Account</label>
+									<input readonly v-model="so.invoice_account" class="form-control mb-2">
+									<label>Customer Name</label>
+									<input readonly v-model="so.customer_name" type="text" class="form-control mb-2">
+					
+								</div>
+							</div>
+							<div class="col-md-2">
+								<div class="form-group">
+									<h4><i class="fas fa-truck"></i> Delivery</h4><hr>
+									<label>Sales Category <b class="text-danger">*</b></label>
+									<v-select class="mb-2" v-model="item.sales_category" label="name" :options="sales_categories"></v-select>
+									<label>Mode of Delivery</label>
+									<input readonly v-model="so.mode_of_delivery" class="form-control mb-2">
+									<label>Receive Now Quantity</label>
+									<input readonly v-model="so.customer_name" type="text" class="form-control mb-2">
+									<h4 class="mt-4"><i class="fas fa-dollar-sign"></i> Sales Tax</h4><hr>
+									<label>Item Sales Tax Group</label>
+									<input v-model="item.item_sales_tax_group" class="form-control mb-2">
+									<label>Sale Tax Group</label>
+									<input v-model="item.sale_tax_group" class="form-control mb-2">">
+									<label>Reason</label>
+									<input v-model="item.reason" class="form-control mb-2">
+								</div>
+							</div>
+							<div class="col-md-2">
+								<div class="form-group">
+									<h4><i class="fas fa-cubes"></i> Item</h4><hr>
+									<label>Product <b class="text-danger">*</b></label>
+									<v-select @input="clearVariant" class="mb-2" v-model="item.product_id" :reduce="item => item.id" label="name" :resetOnOptionsChange="true" placeholder="Select Product" :options="products"></v-select>
+
+									<label>Product Number</label>
+									<input readonly class="form-control mb-2" :value="item.product.product_number">
+
+									<label>Variant <b class="text-danger">*</b></label>
+									<v-select ref="variant" class="mb-2" v-model="item.variant_id" :reduce="item => item.id" label="name" :resetOnOptionsChange="!editing" placeholder="Select Variant" :options="filtered_variants"></v-select>
+
+									<label>Variant Number</label>
+									<input readonly class="form-control mb-2" :value="item.variant.variant_number">
+
+									<label>Size</label>
+									<input readonly v-model="item.variant.size"  maxlength="8" type="tel" class="form-control mb-2">
+
+									<label>Color</label>
+									<input readonly v-model="item.variant.color" maxlength="8" type="tel" class="form-control mb-2">
+
+									<label>Unit Price</label>
+									<input readonly v-model="item.variant.unit_price" maxlength="8" type="tel" class="form-control mb-2">
+									
+									<label>Procurement</label>
+									<input readonly v-model="item.procurement_number" class="form-control mb-2">
+								</div>
+							</div>
+							<div class="col-md-2">
+								<div class="form-group">
+									<h4>&zwnj;</h4><hr>
+									<label>Quantity <b class="text-danger">*</b></label>
+									<input :readonly="!item.variant_id" v-model="item.quantity" type="tel" maxlength="5" class="form-control mb-2">
+									<label>Amount</label>
+									<input  v-model="item.amount" type="number" class="form-control mb-2">
+									<label>Discount</label>
+									<input  v-model="item.discount" type="tel" class="form-control mb-2">
+									<label>Discount Percentage</label>
+									<div class="input-group mb-2">
+									<input :readonly="!item.variant_id" v-model="item.discount_percentage" type="tel" maxlength="4" class="form-control">
+										<div class="input-group-append">
+											<span class="input-group-text">%</span>
+										</div>
+									</div>
+									<label>Charges on Purchases</label>
+									<input v-model="item.charge_on_purchase" type="number" class="form-control mb-2">
+									<label>Specification <b class="text-danger">*</b></label>
+									<v-select class="mb-2" v-model="item.specification_id" :reduce="item => item.id" label="specification_name" placeholder="Select Specification" :options="specifications"></v-select>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<div class="form-group">
+									<h4><i class="fas fa-money-bill"></i> Ledger</h4><hr>
+									<label>Subledger Journal</label>
+									<input  v-model="item.subledger_journal" class="form-control mb-2">
+									<label>Ledger Account</label>
+									<input v-model="item.ledger_account" class="form-control mb-2">
+									<h4 class="mt-4"><i class="fas fa-hand-holding-usd"></i> Financial Dimension</h4><hr>
+									<div class="form-group">
+										<label for="cost_center_id">Cost Center <b class="text-danger">*</b></label>
+										<v-select v-model="item.cost_center_id" :options="cost_centers" label="dimension_name" placeholder="Select Cost Center" :reduce="item => item.id" class="mb-2"></v-select>
+									</div>
+									<div class="form-group">
+										<label for="department_id">Department <b class="text-danger">*</b></label>
+										<v-select v-model="item.department_id" :options="departments" label="dimension_name" placeholder="Select Department" :reduce="item => item.id" class="mb-2"></v-select>
+									</div>  
+									<div class="form-group">
+										<label for="expense_purpose">Expense Purpose <b class="text-danger">*</b></label>
+										<v-select v-model="item.expense_purpose_id" :options="expense_purposes" label="dimension_name" placeholder="Select Expense Purpose" :reduce="item => item.id" class="mb-2"></v-select>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-2">
+								<div class="form-group">
+									<h4><i class="fas fa-user-tie"></i> Audit</h4><hr>
+									<label>Created By</label>
+									<input readonly  v-model="created_by" class="form-control mb-2">
+									<label>Created On</label>
+									<input readonly :value="so.formatted_created_at" class="form-control mb-2">
+									<label>Updated By</label>
+									<input readonly :value="updated_by"  class="form-control mb-2">
+									<label>Updated On</label>
+									<input readonly :value="so.formatted_updated_at" class="form-control mb-2">
+								</div>
+							</div>
+				
+				
+						</div>
+
+					</div>
+					<div class="modal-footer text-right">
+						<button v-if="editing" type="button" class="btn btn-primary" @click="saveLine">Save Changes</button>
+						<button v-if="!editing" type="button" class="btn btn-primary" @click="addLine">Add Line</button>
+					</div>
+				</div>
+			</div>
+			</form-request>
+		</div>
+	</div>
+</template>
+
+<script>
+	import { bus }from 'Root/bus.js';
+	import CrudMixin from 'Mixins/crud.js';
+	import FormRequest from 'Components/forms/FormRequest.vue';
+	import DataTable from 'Components/tables/DataTable.vue';
+	import { ModelListSelect } from 'vue-search-select';
+	import Vselect from "vue-select";
+
+	export default {
+
+		mixins: [ CrudMixin ],
+		
+		components: {
+			'form-request': FormRequest,
+			'data-table': DataTable,
+			'v-select' : Vselect,
+			ModelListSelect
+		},
+
+		props: {
+			products: {
+				default: [],
+				type: Array
+			},
+
+			variants: {
+				default: [],
+				type: Array
+			},
+			
+			// sales order
+			so : {
+				default : [],
+				type : Object
+			},
+
+			lines : {
+				default : [],
+				type : Array,
+			},
+
+			cost_center_value_code: {
+				default: null,
+				type: Number
+			},
+
+			department_value_code: {
+				default: null,
+				type: Number
+			},
+
+			expense_purpose_value_code: {
+				default: null,
+				type: Number
+			},
+			
+			cost_centers: {
+				default: [],
+				type: Array
+			},
+
+			departments: {
+				default: [],
+				type: Array
+			},
+
+			expense_purposes: {
+				default: [],
+				type: Array
+			},
+			
+			clients: {
+				default: [],
+				type: Array
+			},
+			specifications: Array
+		},
+
+		data() {
+			return {
+				created_by : null,
+				updated_by : null,
+				data_table_key : 0,
+				item: {
+					discount_percentage : 0,
+					quantity : 0,
+					charge_on_purchase : 0,
+					discount : 0,
+					amount : 0,
+					ledger_account : null,
+					cost_center_id : null,
+					department_id : null,
+					expense_purpose_id : null,
+					sale_tax_group : null,
+					item_sales_tax_group : null,
+					variant : {
+						size : null,
+						color : null,
+						unit_price : 0,
+					},
+
+					procurement: {procurement: null},
+
+					product : {
+						product_number : null
+					}
+				},
+
+				sales_order_lines: [],
+
+				product_number: null,
+				editing_key: null,
+				editing: false,
+				client_name: null,
+				filtered_variants: [],
+				line_statuses: ['Open Order', 'Recieved', 'Invoiced', 'Canceled'],
+				sales_categories: ['Land','Air','Sea'],
+			}
+		},
+
+
+        computed: {
+            headers() {
+                let array = [
+                    { text: 'Line #', value: 'line_number' },
+                    { text: 'Item #', value: 'product_number' },
+                    { text: 'Line Status', value: 'line_status' },
+					{ text: 'Product', value: 'name' },
+					{ text: 'Variant', value: 'variant' },
+                    { text: 'Size', value: 'size' },
+                    { text: 'Color', value: 'color' },
+                    { text: 'Quanity', value: 'quantity' },
+                    { text: 'Unit Price', value: 'unit_price' },
+                    { text: 'Amount', value: 'amount' },
+                    { text: 'Action', value: null },
+                ];
+
+                return array;
+
+            },
+
+
+            totalQuantity() {
+            	var sales_order_lines = this.sales_order_lines;
+
+            	var total = 0;
+
+            	_.each(sales_order_lines, (line) => {
+            		total += parseInt(line.quantity);
+            	})
+            	this.so.total_data_quantity = total;
+            	return total;
+            },
+
+            subTotalAmount() {
+            	var sales_order_lines = this.sales_order_lines;
+
+            	var total = 0;
+
+            	_.each(sales_order_lines, (line) => {
+					let variant = line.variant;
+            		total += parseInt(line.quantity * variant.unit_price);
+            	})
+
+            	this.so.subtotal_amount = total;
+
+            	return total;
+            },
+
+            totalDiscount() {
+            	var sales_order_lines = this.sales_order_lines;
+
+            	var total = 0;
+
+            	_.each(sales_order_lines, (line) => {
+            		total += parseInt(line.discount);
+            	})
+
+            	this.so.total_discount = total;
+
+            	return total;
+            },
+
+            totalCharges() {
+            	var sales_order_lines = this.sales_order_lines;
+
+            	var total = 0;
+
+            	_.each(sales_order_lines, (line) => {
+            		total += 100;
+            	})
+
+            	this.so.total_charges = total;
+
+            	return total;
+            },
+
+            totalSalesTax() {
+            	var total = 0;
+
+            	total = this.subTotalAmount * 0.2;
+
+            	this.so.total_sales_tax = total;
+
+            	return total;
+
+            },
+
+            totalRoundOff() {
+            	var total = 0;
+
+            	total = this.subTotalAmount - (this.totalDiscount + this.totalCharges + this.totalSalesTax);
+            	total = Math.round(total);
+
+            	this.so.total_round_off = total;
+
+            	return total;
+            },
+
+            totalAmount() {
+            	var total = 0;
+
+            	total = this.subTotalAmount - (this.totalDiscount + this.totalCharges + this.totalSalesTax);
+
+            	this.so.total_amount = total;
+
+            	return total;
+            },
+
+            totalCashDiscount() {
+
+            	this.so.total_cash_discount = 0;
+
+            	return 0;
+            },
+
+            disableConfirmButton() {
+            	if(this.showConfirmButton) {
+	            	return this.item.is_already_confirmed;
+            	}
+
+            	return true;
+            },
+
+            disableGenerateInvoiceButton() {
+            	if(this.showConfirmButton) {
+	            	return this.item.hasExistingInvoice;
+            	}
+
+            	return true;
+            },
+        },
+
+		mounted() {
+			// default selected value
+			this.item.line_status = this.line_statuses[0];
+			this.item.sales_category = this.sales_categories[0];
+
+			this.generateLineCode('create','SOL');
+		},
+
+		watch : {
+
+			'lines'(value) {
+				this.sales_order_lines = value;
+			},
+
+			'item.product_id'(value) {
+				if(value) {
+					this.filtered_variants = this.variants.filter(item => item.product_id == value);
+					this.item.product = this.products.filter(item => item.id == value)[0];
+				}		
+			},
+
+			
+			'item.variant_id'(value) {
+				if(value) {
+					this.item.variant = this.variants.filter(item => item.id == value)[0];
+					this.item.procurement_number = this.item.variant.procurement ? this.item.variant.procurement.procurement : null;
+					this.item.procurement_id = this.item.variant.procurement ? this.item.variant.procurement.id : null;
+				}else {
+					this.item.variant = {
+						size : null,
+						color : null,
+						unit_price : 0,
+					};
+					this.item.amount = 0;
+					this.item.discount = 0;
+				}
+
+				this.renderAmount(this.item);
+			},
+
+			'item.discount_percentage'(value) {
+				if(value <= 100 && value >= 0) {
+					this.item.discount_percentage = value;
+					this.renderAmount(this.item);
+				}else {
+					this.item.discount = 0;
+					this.item.discount = 0;
+					this.item.discount_percentage = 0;
+				}
+			},
+
+			'item.quantity'(value) {
+				this.renderAmount(this.item);
+			},
+
+			'item.unit_price'() {
+				this.renderAmount(this.item);
+			}
+			
+		},
+
+		methods: {
+
+			addLine() {
+				if(this.validateRequiredFields()) {
+					this.item.is_new = true;
+					this.sales_order_lines.push(this.item);
+
+					this.$emit('newLines',this.sales_order_lines);
+					this.initDefaultValue();
+
+					$('#so-lines-modal').modal('hide');
+				}
+			},
+
+			removeLine(key) {
+				this.sales_order_lines.splice(key, 1);
+				this.$emit('newLines',this.sales_order_lines);
+			},
+
+			generateLineCode(value, prefix) {
+				if(value == 'create') {
+					var date = new Date();
+					var time = Math.round(date.getTime() / 1000);	
+					this.item.sales_order_line_number = prefix + '-' + date.getFullYear().toString() + ("0" + (date.getMonth() + 1)).slice(-2) + date.getDate().toString()   +'-'+ time.toString();
+				}
+			},
+
+			computedAmount(item) {
+				return 'total';
+			},
+
+			renderAmount(item) {
+				if(item.quantity > 0 && item.variant.unit_price > 0) {
+					let discount = item.discount_percentage;
+					let amount = 0;
+					let total = item.quantity * item.variant.unit_price;
+					if(discount) {
+						discount = (discount / 100) * total;
+						this.item.discount =  parseFloat(discount).toFixed(2);
+						amount = total - discount;	
+					}else {
+						this.item.discount = 0.00;
+						amount = item.quantity * item.variant.unit_price;
+					}
+					this.item.amount = parseFloat(amount).toFixed(2);
+				}else {
+					this.item.amount = 0.00;
+				}
+			},
+
+			editLine(key) {
+				this.item = Object.assign({}, this.sales_order_lines[key]);
+				// console.log(item, 'item');
+				this.editing_key = key;
+				this.editing = true;
+				$('#so-lines-modal').modal('show');
+			},
+
+			saveLine() {
+				if(this.validateRequiredFields()) {
+					$('#so-lines-modal').modal('hide');
+					this.sales_order_lines[this.editing_key] = this.item;
+					this.editing_key = null;
+					this.editing = false;
+					this.initDefaultValue();
+					this.$emit('newLines',this.sales_order_lines);
+					this.generateLineCode('create', 'SOL');
+					$('#so-lines-modal').modal('hide');
+					this.changeKey();
+				}
+			},
+
+			setClientName(client_id) {
+				let client = this.clients.find(client => client.id == client_id);
+				if (client) {
+					this.client_name = client.name;
+				}
+			},
+
+			newLine() {
+				var date = new Date();
+				var time = Math.round(date.getTime() / 1000);	
+				var line_number = date.getDate().toString() + date.getMonth().toString() + date.getFullYear().toString() +'-'+ time.toString();
+				line_number += "-" + Math.random().toString(36).substring(2, 6);
+
+				this.initDefaultValue();
+				
+				this.setClientName(this.so.client_id);
+
+				this.item.cost_center_id = this.cost_center_value_code;
+				this.item.department_id = this.department_value_code;
+				this.item.expense_purpose_id = this.expense_purpose_value_code;
+
+				this.$nextTick(() => {
+					$('#so-lines-modal').modal('toggle');
+				})
+			},
+
+			initDefaultValue() {
+				this.item = {
+					discount_percentage : 0,
+					quantity : 0,
+					amount : 0,
+					charge_on_purchase : 0,
+					discount : 0,
+					line_status: this.line_statuses[0],
+					sales_category: this.sales_categories[0],
+					cost_center_id : null,
+					department_id : null,
+					expense_purpose_id : null,
+					variant : {},
+					product : {},
+				};
+
+				this.generateLineCode('create','SOL');
+				
+				this.product_number = null;
+				this.filtered_variants = [];
+			},
+
+			validateRequiredFields() {
+				if(!this.item.line_status || !this.item.sales_category || !this.item.variant_id || !this.item.product_id || !this.item.department_id || !this.item.expense_purpose_id || !this.item.cost_center_id)  
+				{
+					swal.fire({
+					icon: 'error',
+					title: 'Required Fields',
+					text: 'Please fill up all the required fields!',
+					});
+
+					return false;
+				}
+				return true
+			},
+			
+			clearVariant() {
+				this.$refs['variant'].clearSelection();
+			},
+
+			changeKey() {
+				this.data_table_key++
+			}
+		}
+	}
+</script>

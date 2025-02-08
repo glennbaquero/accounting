@@ -1,0 +1,458 @@
+<template>
+	<div>
+		<div class="card mt-4">
+
+			<div class="card-header p-2">
+				
+				<div class="row">
+					<div class="col-md-3 row">
+						<div class="col-md-12">
+							<label>Balance</label>
+						</div>
+						<div class="col-md-12">
+							Journal <input type="text" name="" :value="balanceJournal" class="form-control" disabled>
+						</div>
+						<div class="col-md-12">
+							Per voucher <input type="text" name="" :value="balancePerVoucher" class="form-control" disabled>
+						</div>
+					</div>
+					<div class="col-md-3 row">
+						<div class="col-md-12">
+							<label>Total debit</label>
+						</div>
+						<div class="col-md-12">
+							Journal <input type="text" name="" value="0.00"  :value="debitJournal" class="form-control" disabled>
+						</div>
+						<div class="col-md-12">
+							Per voucher <input type="text" name="" value="0.00" :value="debitPerVoucher" class="form-control" disabled>
+						</div>
+					</div>
+					<div class="col-md-3 row">
+						<div class="col-md-12">
+							<label>Total credit</label>
+						</div>
+						<div class="col-md-12">
+							Journal <input type="text" name="" value="0.00" :value="creditJournal" class="form-control" disabled>
+						</div>
+						<div class="col-md-12">
+							Per voucher <input type="text" name="" value="0.00" :value="creditPerVoucher" class="form-control" disabled>
+						</div>
+					</div>
+					<div class="col-md-3 row">
+						<div class="col-md-12">
+							<label>Budget check results</label>
+						</div>
+						<div class="col-md-12">
+							Per voucher: 
+						</div>
+					</div>
+
+				</div>
+
+				<hr>
+
+				<!-- <div class="row">
+					<div class="col-md-4">
+						Display journal lines:
+						<select class="form-control">
+							<option>All</option>
+						</select>
+					</div>
+				</div> -->
+
+				<ul class="nav nav-pills mt-4">
+				    <li class="nav-item"><a class="nav-link active" href="#overview" data-toggle="tab">Overview</a></li>
+				    <li class="nav-item"><a class="nav-link" href="#general" data-toggle="tab">General</a></li>
+				    <li class="nav-item"><a class="nav-link" href="#invoice" data-toggle="tab">Invoice</a></li>
+				    <li class="nav-item"><a class="nav-link" href="#payment" data-toggle="tab">Blocking</a></li>
+				    <li class="nav-item"><a class="nav-link" href="#payment_fee" data-toggle="tab">Payment Fee</a></li>
+				</ul>
+			</div>
+			<div class="card-body">
+				<div class="tab-content">
+		        	<div class="tab-pane show active" id="overview">
+		        		<div class="row">
+				    		<div class="col-sm-12">
+				    			<div class="table-responsive">
+				    			    <table id="journalTable" class="dataTable table table-striped text-center" :style="{ whiteSpace: showOnlyData.date ? 'nowrap' : ''}">
+				    			    	<tr>
+				    			    		<th v-for="header in headers">{{ header.text }}</th>
+				    			    	</tr>
+				    			    	<tr v-for="item in items" @click="selectedLine(item)" :class="item.selected ? 'selected-table' : ''">
+				    			    		<td><input type="checkbox" name="" @change="dataSelected(item)"></td>
+				    			    		<td @dblclick="showOnlyData.date = false">
+		                                    	<template v-if="showOnlyData.date">
+		                                    		{{ item.date }}
+		                                    	</template>
+		                                    	<template v-else>
+									              	<datepicker format="M/dd/yyyy"  v-model="item.date" name="date" input-class="form-control input-sm" @closed="datePickerClosed(item)"></datepicker>
+		                                    	</template>
+				    			    		</td>
+				    			    		<td>{{ item.voucher }}</td>
+				    			    		<td>{{ item.account_type }}</td>
+				    			    		<td @dblclick="showOnlyData.account = false">
+				    			    			<template v-if="showOnlyData.account">
+					    			    			{{ item.account }}
+				    			    			</template>
+				    			    			<template v-else>
+				    			    				<!-- <div class="col-sm-4 h-25	">
+				    			    					
+				    			    				</div>
+				    			    				<select>
+				    			    					<option>asd</option>
+				    			    				</select> -->
+				    			    				<treeselect v-model="value" :multiple="true" :options="options" :allow-selecting-disabled-descendants="true" :disable-branch-nodes="true" :flat="true" />
+				    			    			</template>
+				    			    		</td>
+				    			    		<td>{{ item.description }}</td>
+				    			    		<td>{{ item.debit }}</td>
+				    			    		<td>{{ item.credit }}</td>
+				    			    		<td>{{ item.offset_account_type }}</td>
+				    			    		<td>{{ item.offset_account }}</td>
+				    			    		<td><input type="checkbox" name="" disabled="true" :checked="item.use_deposit_slip"></td>
+				    			    		<td><input type="checkbox" name="" disabled="true" :checked="item.reversing_entry"></td>
+				    			    		<td>{{ item.reversing_date }}</td>
+				    			    	</tr>
+				    			    </table>
+				    			</div>
+				    		</div>
+				    		<div class="col-sm-4 row mt-4">
+				    			<div class="col-sm-12">
+				    				Currency: 
+				    				<select class="form-control" v-model="selected.currency">
+				    					<option value="USD">USD</option>
+				    					<option value="PHP">PHP</option>
+				    				</select>
+				    			</div>
+				    			<div class="col-sm-12">
+				    				Sales tax group: 
+				    				<select class="form-control" v-model="selected.sales_tax_group">
+				    					<option value=""></option>
+				    					<option value="PHP">PHP</option>
+				    				</select>
+				    			</div>
+				    			<div class="col-sm-12">
+				    				Item sales tax group: 
+				    				<select class="form-control" v-model="selected.item_sales_tax_group">
+				    					<option value="AU/VI">AU/VI</option>
+				    				</select>
+				    			</div>
+				    			<div class="col-sm-12">
+				    				Calculated sales tax: 
+				    				<input type="text" name="" class="form-control" value="0.00" v-model="selected.calculated_sales_tax" disabled>
+				    			</div>
+				    			<div class="col-sm-12">
+				    				Actual sales tax amount: 
+				    				<input type="text" name="" class="form-control" value="0.00" v-model="selected.actual_sales_tax_amount" disabled>
+				    			</div>
+				    		</div>
+				    		<div class="col-sm-4 mt-4">
+				    			<div class="col-sm-12">
+				    				Settlement type: 
+				    				<select class="form-control" v-model="selected.settlement_type">
+				    					<option value=""></option>
+				    				</select>
+				    			</div>
+				    			<div class="col-sm-12">
+				    				Account name: 
+				    				<input type="text" name="" class="form-control input-sm" v-model="selected.account_name" disabled>
+				    			</div>
+				    			<div class="col-sm-12">
+				    				Offset account name: 
+				    				<input type="text" name="" class="form-control input-sm" v-model="selected.offset_account_name" disabled>
+				    			</div>
+				    		</div>
+				    		<div class="col-sm-4 mt-4">
+				    			<div class="col-sm-12">
+				    				Withholding tax group: 
+				    				<select class="form-control" v-model="selected.withholding_tax_group">
+				    					<option value=""></option>
+				    				</select>
+				    			</div>
+				    			<div class="col-sm-12">
+				    				Release date:
+				    				<datepicker format="M/dd/yyyy"  v-model="selected.release_date" name="release_date" input-class="form-control input-sm" @closed="datePickerClosed(item)"></datepicker>
+				    			</div>
+				    		</div>
+				    	</div>
+				    </div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+<script type="text/javascript">
+	import Datepicker from 'vuejs-datepicker';
+	import Treeselect from '@riophae/vue-treeselect'
+	import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+
+	export default {
+
+		components: {
+		    'datepicker': Datepicker,
+		    Treeselect
+		},
+
+		computed: {
+		    headers() {
+		        let array = [
+		            { text: '', value: '' },
+		            { text: 'Date', value: null },
+		            { text: 'Voucher', value: null },
+		            { text: 'Account type', value: null },
+		            { text: 'Account', value: null },
+		            { text: 'Description', value: null },
+		            { text: 'Debit', value: null },
+		            { text: 'Credit', value: null },
+		            { text: 'Offset account type', value: null },
+		            { text: 'Offset account', value: null },
+		            { text: 'Use a deposit slip', value: null },
+		            { text: 'Reversing entry', value: null },
+		            { text: 'Reversing date', value: null },
+		        ];
+
+		        return array;
+		    },
+
+            balanceJournal() {
+            	var credit = 0;
+            	var debit = 0;
+
+            	credit = _.sumBy(this.items, (item) => {
+            		return parseFloat(item.credit);
+            	});
+
+            	debit = _.sumBy(this.items, (item) => {
+            		return parseFloat(item.debit);
+            	});
+
+            	return parseFloat(credit - debit);
+            },
+
+            balancePerVoucher() {
+            	var credit = 0;
+            	var debit = 0;
+
+            	credit = _.sumBy(this.items, (item) => {
+            		if(item.alreadyInSelectedItem) {
+	            		return parseFloat(item.credit);
+            		} else {
+            			return 0;
+            		}
+            	});
+
+            	debit = _.sumBy(this.items, (item) => {
+            		if(item.alreadyInSelectedItem) {
+	            		return parseFloat(item.debit);
+            		} else {
+            			return 0;
+            		}
+            	});
+
+            	return parseFloat(credit - debit);
+            },
+
+            debitJournal() {
+            	return _.sumBy(this.items, (item) => {
+            		return parseFloat(item.debit);
+            	});
+            },
+
+            debitPerVoucher() {
+            	return _.sumBy(this.items, (item) => {
+            		if(item.alreadyInSelectedItem) {
+	            		return parseFloat(item.debit);
+            		} else {
+            			return 0;
+            		}
+            	});
+            },
+
+
+            creditJournal() {
+            	return _.sumBy(this.items, (item) => {
+            		return parseFloat(item.credit);
+            	});
+            },
+
+            creditPerVoucher() {
+            	return _.sumBy(this.items, (item) => {
+            		if(item.alreadyInSelectedItem) {
+	            		return parseFloat(item.credit);
+            		} else {
+            			return 0;
+            		}
+            	});
+            },
+
+		    // selected() {
+		    // 	var items = [];
+
+		    // 	_.each(this.items, (item) => {
+		    // 		if(item.selected) {
+		    // 			items.push(item)
+		    // 		}
+		    // 	})
+
+		    // 	return items;
+		    // }
+		},
+
+		data() {
+			return {
+				items: [
+					{
+						id: 1,
+						date: '11/11/2020',
+						voucher: 'GNJL00001',
+						account_type: 'Ledger',
+						account: 'chap',
+						description: null,
+						debit: 0,
+						credit: 1500.00,
+						offset_account_type: null,
+						offset_account: null,
+						use_deposit_slip: false,
+						reversing_entry: false,
+						reversing_date: null,
+						selected: false,
+                        alreadyInSelectedItem: false,
+
+                        currency: 'USD',
+                        sales_tax_group: null,
+                        item_sales_tax_group: 'AU/VI',
+                        calculated_sales_tax: 0.00,
+                        actual_sales_tax_amount: 0.00,
+                        settlement_type: null,
+                        account_name: null,
+                        offset_account_name: null,
+                        withholding_tax_group: null,
+                        release_date: '10/12/2020'
+					},
+					{
+						id: 2,
+						date: '11/12/2020',
+						voucher: 'GNJL00002',
+						account_type: 'Ledger',
+						account: 'chap',
+						description: null,
+						debit: 1300.00,
+						credit: 1500.00,
+						offset_account_type: null,
+						offset_account: null,
+						use_deposit_slip: false,
+						reversing_entry: false,
+						reversing_date: null,
+						selected: false,
+                        alreadyInSelectedItem: false,
+
+                        currency: 'PHP',
+                        sales_tax_group: null,
+                        item_sales_tax_group: 'AU/VI',
+                        calculated_sales_tax: 0.00,
+                        actual_sales_tax_amount: 0.00,
+                        settlement_type: null,
+                        account_name: null,
+                        offset_account_name: null,
+                        withholding_tax_group: null,
+                        release_date: '10/15/2020'
+					},
+				],
+
+				showOnlyData: {
+					date: true,
+					account: true
+				},
+
+				selected: {},
+
+				value: null,
+
+				options: [{
+				    id: 'Main Account',
+				    label: 'Main Account',
+			        children: [ {
+			            id: 'main_account_1',
+			            label: '1',
+			            isDisabled: false
+			        }, {
+			            id: 'main_account_2',
+			            label: '2',
+			            isDisabled: false
+					} ],
+				   	},{
+				    id: 'Business Unit',
+				    label: 'Business Unit',
+			        children: [ {
+			            id: 'bu_1',
+			            label: '1',
+			            isDisabled: false
+			        }, {
+			            id: 'bu_2',
+			            label: '2',
+			            isDisabled: false
+					} ],
+				   	},{
+				    id: 'Department',
+				    label: 'Department',
+			        children: [ {
+			            id: 'dept_1',
+			            label: '1',
+			            isDisabled: false
+			        }, {
+			            id: 'dept_2',
+			            label: '2',
+			            isDisabled: false
+					} ],
+				   	},{
+				    id: 'Cost Center',
+				    label: 'Cost Center',
+			        children: [ {
+			            id: 'cc_1',
+			            label: '1',
+			            isDisabled: false
+			        }, {
+			            id: 'cc_2',
+			            label: '2',
+			            isDisabled: false
+					} ],
+				   	},{
+				    id: 'Item Group',
+				    label: 'Item Group',
+			        children: [ {
+			            id: 'ig_1',
+			            label: '1',
+			            isDisabled: false
+			        }, {
+			            id: 'ig_2',
+			            label: '2',
+			            isDisabled: false
+					} ],
+				   	}],
+
+
+
+			}
+		},
+
+		methods: {
+			datePickerClosed(item) {
+				item.date = moment(item.date).format('MM/DD/YYYY');
+				this.showOnlyData.date = true;
+			},
+
+			selectedLine(item) {
+				_.each(this.items, (item) => {
+					item.selected = false;	
+				})
+				item.selected = true;
+				this.selected = item;
+			},
+
+			dataSelected(item) {
+				item.alreadyInSelectedItem = !item.alreadyInSelectedItem;
+			},
+		}
+
+	}
+</script>

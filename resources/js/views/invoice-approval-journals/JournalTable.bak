@@ -1,0 +1,654 @@
+<!-- <template>
+	<div>
+		<filter-box @refresh="fetch">
+            <template v-slot:left>
+            	    <div class="form-group col-md-6">
+            	        <label>Show</label> &nbsp;
+            	        <select class="form-control" @change="filter($event, 'show')">
+                            <option value="Open">Open</option>
+                            <option value="Posted">Posted</option>
+                            <option value="Cancelled">Cancelled</option>
+                            <option value="Transferred to accounts payable">Transferred to accounts payable</option>
+                            <option value="On">On hold</option>
+                            <option value="Replaced">Replaced</option>
+            	            <option value="Paid">Paid</option>
+            	        </select>
+            	    </div>
+            </template>
+            <template v-slot:right>
+                <search-form
+                @search="filter($event, 'search')">
+                </search-form>
+            </template>
+        </filter-box>
+        <data-table
+        ref="data-table"
+        :headers="headers"
+        :filters="filters"
+        :fetch-url="fetchUrl"
+        :no-action="true"
+        :disabled="disabled"
+        order-by="id"
+        order-desc
+        @load="load"
+        >
+
+            <template v-slot:body="{ items }">
+                <tr v-for="item in items">
+                    <td>{{ item.id }}</td>
+                    <td>{{ item.name }}</td>
+                    <td><input type="checkbox" disabled :checked="item.is_credit_card"></td>
+                    <td>{{ item.created_at }}</td>
+                    <td>
+                        <view-button :href="item.showUrl"></view-button>
+                        
+                        <action-button
+                        small 
+                        color="btn-danger"
+                        alt-color="btn-warning"
+                        :show-alt="item.deleted_at"
+                        :action-url="item.archiveUrl"
+                        :alt-action-url="item.restoreUrl"
+                        icon="fas fa-trash"
+                        alt-icon="fas fa-trash-restore-alt"
+                        confirm-dialog
+                        :disabled="loading"
+                        title="Archive Item"
+                        alt-title="Restore Item"
+                        :message="'Are you sure you want to archive Payment Method #' + item.id + '?'"
+                        :alt-message="'Are you sure you want to restore Payment Method #' + item.id + '?'"
+                        @load="load"
+                        @success="sync"
+                        ></action-button>
+                    </td>
+                </tr>
+            </template>
+
+        </data-table>
+
+        <loader 
+        :loading="loading">
+        </loader>
+	</div>
+</template> -->
+
+<template>
+    <div>
+        <div class="card mt-4 p-2">
+
+            <div class="card-header p-2">
+
+                <div class="row">
+                    <div class="col-sm-12 mt-4">
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#new-journal">New</button>
+                        <a href="#" class="btn btn-warning">Edit</a>
+                        <a href="#" class="btn btn-secondary">Lines</a>
+                        <a href="#" class="btn btn-danger">Validate</a>
+                        <a href="#" class="btn btn-success">Post</a>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-sm-4">
+                        Show: 
+                        <select class="form-control">
+                            <option>All</option>
+                            <option>Open</option>
+                            <option>Posted</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <ul class="nav nav-pills mt-4">
+                    <li class="nav-item"><a class="nav-link active" href="#overview" data-toggle="tab">Overview</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#general" data-toggle="tab">General</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#setup" data-toggle="tab">Setup</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#financial_dimension" data-toggle="tab">Financial dimensions</a></li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="tab-pane show active" id="overview">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="table-responsive">
+                                    <table id="journalTable" class="dataTable table table-striped text-center" style="white-space: nowrap">
+                                        <tr>
+                                            <th v-for="header in headers">{{ header.text }}</th>
+                                        </tr>
+                                        <tr v-for="item in items">
+                                            <td><input type="checkbox" name=""></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="general">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label>Invoice Approval Journal number</label>
+                                        <input type="text" class="form-control" v-model="selected.invoice_approval_journal_number" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Journal Batch number</label>
+                                        <input type="text" class="form-control" v-model="selected.invoice_journal_batch_number" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Journal Name number</label>
+                                        <input type="text" class="form-control" v-model="selected.journal_name_number" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Journal name</label>
+                                        <input type="text" class="form-control" v-model="selected.journal_name" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Description</label>
+                                        <input type="text" class="form-control" v-model="selected.description" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>(Balance) Journal</label>
+                                        <input type="text" class="form-control" v-model="selected.balance_journal" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>(Total debit) Journal</label>
+                                        <input type="text" class="form-control" v-model="selected.total_debit_journal" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>(Total credit) Journal</label>
+                                        <input type="text" class="form-control" v-model="selected.total_credit_journal" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Reported as ready by</label>
+                                        <input type="text" class="form-control" v-model="selected.reported_as_ready_by_journal" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Approved by</label>
+                                        <input type="text" class="form-control" v-model="selected.approved_by_journal" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Approved date</label>
+                                        <input type="text" class="form-control" v-model="selected.approved_date" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label>Rejected by</label>
+                                        <input type="text" class="form-control" v-model="selected.rejected_by_journal" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Posted</label>
+                                        <input type="checkbox" v-model="selected.posted_checkbox" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Posted on</label>
+                                        <input type="text" class="form-control" v-model="selected.posted_on" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Posted by</label>
+                                        <input type="text" class="form-control" v-model="selected.posted_by" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Log</label>
+                                        <input type="checkbox" v-model="selected.log_in_checkbox" disabled>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Log Message</label>
+                                        <input type="text" class="form-control" v-model="selected.log_message" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Reversing Entry</label>
+                                        <input type="checkbox"  v-model="selected.reversing_entry_checkbox" disabled>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Reversing date</label>
+                                        <input type="text" class="form-control" v-model="selected.reversing_date" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Original Journal number</label>
+                                        <input type="text" class="form-control" v-model="selected.original_journal_number" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Show user-created only</label>
+                                        <input type="checkbox" v-model="selected.show_user_created_only" disabled>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Journal type</label>
+                                        <input type="text" class="form-control" v-model="selected.journal_type" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label>Account type</label>
+                                        <input type="text" class="form-control" v-model="selected.account_type" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Offset account</label>
+                                        <input type="text" class="form-control" v-model="selected.offset_account" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Document</label>
+                                        <input type="text" class="form-control" v-model="selected.document" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Detail level</label>
+                                        <input type="text" class="form-control" v-model="selected.detail_level" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Posting layer</label>
+                                        <input type="text" class="form-control" v-model="selected.posting_layer" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Number allocation at posting</label>
+                                        <input type="text" class="form-control" v-model="selected.number_allocation_at_posting" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Delete lines after posting</label>
+                                        <input type="checkbox" v-model="selected.delete_lines_after_posting" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Lines limit</label>
+                                        <input type="text" class="form-control" v-model="selected.lines_limit" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Amounts include sales tax</label>
+                                        <input type="checkbox" v-model="selected.amounts_include_sales_tax" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Remittance type</label>
+                                        <input type="text" class="form-control" v-model="selected.remittance_type" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Bank account</label>
+                                        <input type="text" class="form-control" v-model="selected.bank_account" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label>Cost center</label>
+                                        <input type="text" class="form-control" v-model="selected.cost_center" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Department</label>
+                                        <input type="text" class="form-control" v-model="selected.department" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Expense purpose</label>
+                                        <input type="text" class="form-control" v-model="selected.expense_purpose" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>In Use</label>
+                                        <input type="checkbox" v-model="selected.in_use_checkbox" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Used by user</label>
+                                        <input type="text" class="form-control" v-model="selected.used_by_user" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Created by</label>
+                                        <input type="text" class="form-control" v-model="selected.created_by" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Created on</label>
+                                        <input type="checkbox" v-model="selected.created_on" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Updated by</label>
+                                        <input type="text" class="form-control" v-model="selected.updated_by" readonly>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Updated on</label>
+                                        <input type="text" class="form-control" v-model="selected.updated_on" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="setup">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <label>In Use</label>
+                                <input type="checkbox" v-model="selected.in_use_checkbox" readonly>
+                            </div>
+                            <div class="col-sm-12">
+                                <label>Created on</label>
+                                <input type="checkbox" v-model="selected.created_on" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <label>Used by user</label>
+                                <input type="text" class="form-control" v-model="selected.used_by_user" readonly>
+                            </div>
+                            <div class="col-sm-6">
+                                <label>Created by</label>
+                                <input type="text" class="form-control" v-model="selected.created_by" readonly>
+                            </div>
+                            <div class="col-sm-6">
+                                <label>Updated by</label>
+                                <input type="text" class="form-control" v-model="selected.updated_by" readonly>
+                            </div>
+                            <div class="col-sm-6">
+                                <label>Updated on</label>
+                                <input type="text" class="form-control" v-model="selected.updated_on" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="financial_dimension">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label>Cost center</label>
+                                <select name="cost_center" v-model="selected.cost_center" class="form-control">
+                                    <option v-for="cost_center in cost_centers" :value="cost_center.financial_dimension_value_code">{{ cost_center.dimension_name }}</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <label>Department</label>
+                                <select name="department" v-model="selected.department" class="form-control">
+                                    <option v-for="department in departments" :value="department.financial_dimension_value_code">{{ department.dimension_name }}</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4">
+                                <label>Expense purpose</label>
+                                <select name="expense_purpose" v-model="selected.expense_purpose" class="form-control">
+                                    <option v-for="expense_purpose in expense_purposes" :value="expense_purpose.financial_dimension_value_code">{{ expense_purpose.dimension_name }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="new-journal">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label>Journal Batch number</label>
+                                        <input type="text" class="form-control" v-model="item.invoice_journal_batch_number" name="invoice_journal_batch_number">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Journal Name number</label>
+                                        <input type="text" class="form-control" v-model="item.journal_name_number" name="journal_name_number">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Journal name</label>
+                                        <input type="text" class="form-control" v-model="item.journal_name" name="journal_name">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Description</label>
+                                        <input type="text" class="form-control" v-model="item.description" name="description">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Reported as ready by</label>
+                                        <select class="form-control" v-model="item.reported_as_ready_by_journal" name="reported_as_ready_by_journal">
+                                            <option>User</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Approved by</label>
+                                        <select class="form-control" v-model="item.approved_by_journal" name="approved_by_journal">
+                                            <option>User</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Approved date</label>
+                                        <input type="text" class="form-control" ref="approved_date" v-model="item.approved_date" name="approved_date">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label>Rejected by</label>
+                                        <input type="text" class="form-control" v-model="item.rejected_by_journal" name="rejected_by_journal">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Posted</label>
+                                        <input type="checkbox" v-model="item.posted_checkbox" name="posted_checkbox">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Posted on</label>
+                                        <input type="text" class="form-control" ref="posted_on"  v-model="item.posted_on" name="posted_on">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Posted by</label>
+                                        <select class="form-control" v-model="item.posted_by" name="posted_by">
+                                            <option>User</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Log</label>
+                                        <input type="checkbox" v-model="selected.log_in_checkbox" disabled>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Log Message</label>
+                                        <input type="text" class="form-control" v-model="item.log_message" name="log_message">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Reversing Entry</label>
+                                        <input type="checkbox"  v-model="selected.reversing_entry_checkbox" disabled>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Reversing date</label>
+                                        <input type="text" class="form-control" ref="reversing_date" v-model="item.reversing_date" name="reversing_date">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Original Journal number</label>
+                                        <input type="text" class="form-control" v-model="item.original_journal_number" name="original_journal_number">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Show user-created only</label>
+                                        <input type="checkbox" v-model="selected.show_user_created_only" disabled>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Journal type</label>
+                                        <input type="text" class="form-control" v-model="item.journal_type" name="journal_type">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label>Account type</label>
+                                        <input type="text" class="form-control" v-model="item.account_type" name="account_type">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Offset account</label>
+                                        <input type="text" class="form-control" v-model="item.offset_account" name="offset_account">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Document</label>
+                                        <input type="text" class="form-control" v-model="item.document" name="document">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Detail level</label>
+                                        <input type="text" class="form-control" v-model="item.detail_level" name="detail_level">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Posting layer</label>
+                                        <input type="text" class="form-control" v-model="item.posting_layer" name="posting_layer">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Number allocation at posting</label>
+                                        <input type="text" class="form-control" v-model="item.number_allocation_at_posting" name="number_allocation_at_posting">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Delete lines after posting</label>
+                                        <input type="checkbox" v-model="item.delete_lines_after_posting" name="delete_lines_after_posting">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Lines limit</label>
+                                        <input type="text" class="form-control" v-model="item.lines_limit" name="lines_limit">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Amounts include sales tax</label>
+                                        <input type="checkbox" v-model="item.amounts_include_sales_tax" name="amounts_include_sales_tax">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Remittance type</label>
+                                        <input type="text" class="form-control" v-model="item.remittance_type" name="remittance_type">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Bank account</label>
+                                        <input type="text" class="form-control" v-model="item.bank_account" name="bank_account">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <label>Cost center</label>
+                                        <select name="cost_center" v-model="item.cost_center" class="form-control">
+                                            <option v-for="cost_center in cost_centers" :value="cost_center.financial_dimension_value_code">{{ cost_center.dimension_name }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Department</label>
+                                        <select name="department" v-model="item.department" class="form-control">
+                                            <option v-for="department in departments" :value="department.financial_dimension_value_code">{{ department.dimension_name }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Expense purpose</label>
+                                        <select name="expense_purpose" v-model="item.expense_purpose" class="form-control">
+                                            <option v-for="expense_purpose in expense_purposes" :value="expense_purpose.financial_dimension_value_code">{{ expense_purpose.dimension_name }}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>In Use</label>
+                                        <input type="checkbox" v-model="item.in_use_checkbox" name="in_use_checkbox">
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <label>Used by user</label>
+                                        <input type="text" class="form-control" v-model="item.used_by_user" name="used_by_user">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer text-right">
+                        <button type="button" class="btn btn-primary">Add journal</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+<script>
+	import { bus }from 'Root/bus.js';
+
+	export default {
+		props: {
+			type: String,
+
+		},
+
+		data() {
+			return {
+				items: [],
+                selected: {},
+                item: {},
+
+                cost_centers: [],
+                departments: [],
+                expense_purposes: [],
+			}
+		},
+
+		computed: {
+			headers() {
+				let array = [];
+
+                switch(this.type) {
+                    case 'overview': 
+                        array = [
+                            { text: '', value: '' },
+                            { text: 'Name', value: 'name' },
+                            { text: 'Journal batch number', value: 'journal_batch_number' },
+                            { text: 'Journal name', value: 'journal_name' },
+                            { text: 'Description', value: 'description' },
+                            { text: 'Posted date', value: 'posted_date' },
+                            { text: 'Log', value: 'log' },
+                            { text: 'In use', value: 'in_use' },
+                            { text: 'Used by user', value: 'used_by_user' },
+                            { text: 'Posted on', value: 'posted_on' },
+                            { text: 'Posted by', value: 'posted_by' },
+                            { text: 'Reversing date', value: 'reversing_date' },
+                            { text: 'Approved by', value: 'approved_by' },
+                            { text: 'Journal status', value: 'journal_status' },
+                            { text: 'Balance', value: 'balance' },
+                            { text: 'Total debit', value: 'total_credit' },
+                            { text: 'Total credit', value: 'total_debit' },
+                        ];
+
+                        break;
+
+                    case 'general':
+                        array = [
+                            { text: 'Name', value: 'name' },
+                            { text: 'Journal batch number', value: 'journal_batch_number' },
+                            { text: 'Journal name', value: 'journal_name' },
+                            { text: 'Journal name number', value: 'journal_name_number' },
+                            { text: 'Description', value: 'description' },
+                            { text: 'Posted date', value: 'posted_date' },
+                            { text: 'Log', value: 'log' },
+                            { text: 'In use', value: 'in_use' },
+                            { text: 'Used by user', value: 'used_by_user' },
+                            { text: 'Journal type', value: 'journal_type' },
+                            { text: 'Account type', value: 'account_type' },
+                            { text: 'Offset account', value: 'offset_account' },
+                            { text: 'Document', value: 'document' },
+                            { text: 'Posted on', value: 'posted_on' },
+                            { text: 'Posted by', value: 'posted_by' },
+                            { text: 'Reversing date', value: 'reversing_date' },
+                            { text: 'Approved by', value: 'approved_by' },
+                            { text: 'Journal status', value: 'journal_status' },
+                            { text: 'Balance', value: 'balance' },
+                            { text: 'Total debit', value: 'total_credit' },
+                            { text: 'Total credit', value: 'total_debit' },
+                        ];
+
+                        break;
+
+                }
+
+				return array;
+			}
+		},
+
+        mounted() {
+            flatpickr(this.$refs.reversing_date)
+            flatpickr(this.$refs.posted_on)
+            flatpickr(this.$refs.approved_date)
+        }
+	}
+</script>

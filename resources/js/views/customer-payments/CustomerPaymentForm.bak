@@ -1,0 +1,1502 @@
+<template>
+    <div>
+        <form-request :submit-url="submitUrl" @load="load" @success="fetch" confirm-dialog sync-on-success :params="item">
+            <card>
+                <template v-slot:header>
+                    Customer Payment Information
+                    <div class="float-right">
+                        <button :disabled="!areItemLinesValid(item.itemLines) || item.approved_payment == 1" class="btn btn-primary btn-sm">Save Changes</button>
+                        <button type="button" :disabled="item.approved_payment || !item.id || hasNoApprovedLine" @click="confirmThisForm" class="btn btn-success btn-sm">Approve Payment</button>
+                        <button type="button" :disabled="!item.approved_payment || item.posted_payment || !item.id" @click="postedThisForm" class="btn btn-success btn-sm">Post</button>
+                    </div>
+                </template>
+
+                <div class="card">
+
+                    <!-- Tab Navigation -->
+
+				    <div class="card-header">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <ul class="nav nav-pills">
+                                    <li class="nav-item"><a class="nav-link active" href="#customer_payment" data-toggle="tab">Customer Payment</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#financial_dimension" data-toggle="tab">Financial Dimension</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#check_payment" data-toggle="tab">Check Payment</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#customer_payment_lines" data-toggle="tab">Customer Payment Lines</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#subsidiary_ledger" data-toggle="tab">Subsidiary Ledger</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#checks" data-toggle="tab">Checks</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-3">
+								<div class="row">
+									<div class="col-md-3 mt-2">
+										<label>Client <template v-if="item.id">:</template></label>
+									</div>
+									<div class="col-md-9">
+										<template v-if="!item.id">
+											<v-select ref="client_select" :disabled="item.id ? true : false" v-model="client_id" :reduce="item => item.id" label="name" placeholder="Select Client" :options="clients"></v-select>
+										</template>
+										<template v-else>
+											<input readonly class="form-control" :value="item.client ? item.client.name : '---'">
+										</template>
+									</div>
+								</div>
+                            </div>
+                        </div>
+				    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+
+                            <!-- Customer Payment - TAB -->
+
+                            <div class="tab-pane show active" id="customer_payment">
+                                <div class="row">
+
+                                    <!-- Customer Payment Column -->
+
+                                    <div class="col-md-3">                                        
+                                        <h4><i class="fa fa-info-circle" aria-hidden="true"></i> Customer Payment</h4><hr>
+                                        <!-- <div class="form-group">
+                                            <label>Transaction Type <b class="text-danger">*</b></label>
+                                            <v-select v-model="item.transaction_type" :options="transaction_types"  placeholder="Select Transaction Type" class="mb-2"></v-select>
+                                        </div> -->
+                                        <div class="form-group">
+                                            <label for="customer_payment_number">Payment ID</label>
+                                            <input type="text" class="form-control" id="customer_payment_number" name="customer_payment_number" v-model="item.customer_payment_number" readonly="readonly">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="issue_date">Issue Date  <b class="text-danger">*</b></label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input ref="issue_date" type="text" class="form-control calendar-form" id="issue_date" name="issue_date" v-model="item.issue_date" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="payment_release_date">Payment Release Date</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input ref="payment_release_date" type="text" class="form-control calendar-form" id="payment_release_date" name="payment_release_date" v-model="item.payment_release_date" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="clearing_date">Clearing Date</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input ref="clearing_date" type="text" class="form-control calendar-form" id="clearing_date" name="clearing_date" v-model="item.clearing_date" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="due_date">Due Date <b class="text-danger">*</b></label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input ref="due_date" type="text" class="form-control calendar-form" id="due_date" name="due_date" v-model="item.due_date" readonly>
+                                            </div>
+                                        </div>  
+                                        <div class="form-group">
+                                            <label for="customer_invoice_id">Invoice Number</label>
+                                            <v-select :disabled="item.created_at ? true : false" v-model="item.customer_invoice_id" :options="customer_invoices" label="customer_invoice_number" placeholder="Select Invoice Number" :reduce="item => item.id" class="mb-2"></v-select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="payee">Payee</label>
+                                            <input type="text" class="form-control" name="payee" v-model="item.payee" id="payee">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="description">Description</label>
+                                            <textarea class="form-control" id="description" name="description" v-model="item.description"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status Column -->
+
+                                    <div class="col-md-3">
+                                        <h4><i class="fa fa-question-circle" aria-hidden="true"></i> Status</h4><hr>
+                                        <div class="form-group">
+                                            <label for="payment_status">Payment Status <b class="text-danger">*</b></label>
+                                            <v-select v-model="item.payment_status" :options="payment_statuses" label="value" placeholder="Select Payment Status" :reduce="item => item.id" class="mb-2"></v-select>
+                                        </div>
+
+                                        <div class="form-group">
+											<label>Approved Payment</label>
+											<div class="custom-control custom-switch mb-3 mt-2">
+											<input type="checkbox" disabled class="custom-control-input" id="approved_payment" name="approved_payment" v-model="item.approved_payment">
+												<label class="custom-control-label" for="approved_payment">
+													<span class="badge" :class="item.approved_payment ? 'badge-success' : 'badge-danger'">
+														{{ item.approved_payment ? 'Yes' : 'No'  }}
+													</span>
+												</label>
+											</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="approved_date">Approved Date</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input ref="approved_date" type="text" readonly="readonly" class="form-control" id="approved_date" name="approved_date" v-model="item.approved_date">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="approved_by_id">Approved By</label>
+                                            <input type="text" class="form-control" id="approved_by_id" name="approved_by_id" v-model="item.approved_by_id" readonly="readonly">
+                                        </div>
+                                        <div class="form-group">
+											<label>Posted Payment</label>
+											<div class="custom-control custom-switch mb-3 mt-2">
+											<input type="checkbox" disabled class="custom-control-input" id="posted_payment" name="posted_payment" v-model="item.posted_payment">
+												<label class="custom-control-label" for="posted_payment">
+													<span class="badge" :class="item.posted_payment ? 'badge-success' : 'badge-danger'">
+														{{ item.posted_payment ? 'Yes' : 'No'  }}
+													</span>
+												</label>
+											</div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="posting_date">Posting Date</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input ref="posting_date" type="text" class="form-control" id="posting_date" name="posting_date" v-model="item.posting_date" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="posted_by_name">Posted By</label>
+                                            <input type="text" class="form-control" id="posted_by_name" name="posted_by_name" v-model="item.posted_by_name" readonly="readonly">
+                                        </div>
+                                    </div>
+
+                                    <!-- Sales Tax & Cash Discount -->
+
+                                    <div class="col-md-3">
+                                        <!-- Sales Tax -->
+                                        <h4><i class="fas fa-dollar-sign" aria-hidden="true"></i> Sales Tax</h4><hr>
+                                        <div class="form-group">
+                                            <label for="sales_tax_group">Sales Tax Group</label>
+                                            <input type="text" class="form-control" name="sales_tax_group" v-model="item.sales_tax_group" id="sales_tax_group">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="tax_exempt_group">Tax Exempt Group</label>
+                                            <input type="text" class="form-control" name="tax_exempt_group" v-model="item.tax_exempt_group" id="tax_exempt_group">
+                                        </div>
+                                        <div class="form-group">
+											<label>Prices Include Sales Tax</label>
+											<div class="custom-control custom-switch mb-3 mt-2">
+											<input type="checkbox" class="custom-control-input" id="prices_included_sales_tax" name="prices_included_sales_tax" v-model="item.prices_included_sales_tax">
+												<label class="custom-control-label" for="prices_included_sales_tax">
+													<span class="badge" :class="item.prices_included_sales_tax ? 'badge-success' : 'badge-danger'">
+														{{ item.prices_included_sales_tax ? 'Yes' : 'No'  }}
+													</span>
+												</label>
+											</div>
+                                        </div>
+                                        <div class="form-group">
+											<label>Ignore Calculated Tax</label>
+											<div class="custom-control custom-switch mb-3 mt-2">
+											<input type="checkbox" class="custom-control-input" id="ignore_calculated_tax" name="ignore_calculated_tax" v-model="item.ignore_calculated_tax">
+												<label class="custom-control-label" for="ignore_calculated_tax">
+													<span class="badge" :class="item.ignore_calculated_tax ? 'badge-success' : 'badge-danger'">
+														{{ item.ignore_calculated_tax ? 'Yes' : 'No'  }}
+													</span>
+												</label>
+											</div>
+                                        </div>
+
+                                        <!-- Cash Discount -->
+                                        <h4 class="text-center"><i class="fa fa-percentage" aria-hidden="true"></i> Cash Discount</h4><hr>
+
+                                        <div class="form-group">
+                                            <label for="cash_discount_code">Cash Discount Code</label>
+                                            <input type="text" class="form-control" name="cash_discount_code" v-model="item.cash_discount_code" id="cash_discount_code">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cash_discount">Cash Discount</label>
+                                            <input type="number" class="form-control" name="cash_discount" v-model="item.cash_discount" id="cash_discount">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cash_discount_percentage">Cash Discount Percentage</label>
+                                            <input type="number" class="form-control" name="cash_discount_percentage" v-model="item.cash_discount_percentage" id="cash_discount_percentage">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="charges_group">Charges Group</label>
+                                            <input type="text" class="form-control" name="charges_group" v-model="item.charges_group" id="charges_group">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <h4><i class="fa fa-store" aria-hidden="true"></i> Customer</h4><hr>
+                                        <div class="form-group">
+                                            <label for="customer_account">Customer Account</label>
+                                            <v-select @input="inputInheritCustomerAccount" v-model="item.customer_account_id" :options="customers" label="company" placeholder="Select Customer" :reduce="item => item.id" class="mb-2"></v-select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="customer_number">Customer Number</label>
+                                            <input type="text" class="form-control" name="customer_number" v-model="item.customer_account" id="customer_number" readonly="readonly">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="invoice_account">Invoice Account</label>
+                                            <input type="text" class="form-control" name="invoice_account" v-model="item.invoice_account" id="invoice_account" readonly="readonly">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="customer_contact_id">Customer Contact Id</label>
+                                            <input type="text" class="form-control" name="customer_contact_id" v-model="item.customer_contact_id" id="customer_contact_id">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="customer_address">Customer Address</label>
+                                            <input type="text" class="form-control" name="customer_address" v-model="item.customer_address" id="customer_address">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Financial Dimension - TAB -->
+                            <div class="tab-pane" id="financial_dimension">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h4><i class="fas fa-hand-holding-usd"></i> Financial Dimension</h4><hr>
+
+                                        <div class="form-group">
+                                            <label for="dimension_value_cost_center_id">Cost Center <b class="text-danger">*</b></label>
+                                            <v-select v-model="item.dimension_value_cost_center_id" :options="cost_centers" label="dimension_name" placeholder="Select Cost Center" :reduce="item => item.id" class="mb-2"></v-select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="dimension_value_department_id">Department <b class="text-danger">*</b></label>
+                                            <v-select v-model="item.dimension_value_department_id" :options="departments" label="dimension_name" placeholder="Select Department" :reduce="item => item.id" class="mb-2"></v-select>
+                                        </div>  
+                                        <div class="form-group">
+                                            <label for="expense_purpose">Expense Purpose <b class="text-danger">*</b></label>
+                                            <v-select v-model="item.dimension_value_expense_purpose_id" :options="expense_purposes" label="dimension_name" placeholder="Select Expense Purpose" :reduce="item => item.id" class="mb-2"></v-select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="posting_profile">Posting Profile</label>
+                                            <v-select v-model="item.posting_profile" :reduce="item => item.id" label="posting_profile" :options="posting_profiles"></v-select>
+                                            <input type="hidden" class="form-control" name="posting_profile" v-model="item.posting_profile" id="posting_profile">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="document">Document</label>
+                                            <input type="text" class="form-control" name="document" v-model="item.document" id="document">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="document_status">Document Status</label>
+                                            <input type="text" class="form-control" name="document_status" v-model="item.document_status" id="document_status">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label for="accounting_distribution">Accounting Distribution</label>
+                                            <input type="text" class="form-control" name="accounting_distribution" v-model="item.accounting_distribution" id="accounting_distribution">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h4><i class="fas fa-user-tie"></i> Audit</h4><hr>
+                                        <div class="form-group">
+                                            <label for="created_by">Created By</label>
+                                            <input type="text" class="form-control" v-model="item.created_by_name" id="created_by" readonly="readonly">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="created_on">Created On</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input ref="created_on" type="text" class="form-control" v-model="item.created_at" id="created_on" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="updated_by">Updated By</label>
+                                            <input ref="updated_by" type="text" class="form-control" id="updated_by" name="updated_by_name" v-model="item.updated_by_name" readonly="readonly">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="updated_on">Updated On</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input ref="updated_on" type="text" class="form-control" v-model="item.updated_at" id="updated_on" readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Check Payment -->
+
+                            <div class="tab-pane" id="check_payment">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <h4><i class="fas fa-file-invoice-dollar"></i> Check Payment</h4><hr>
+                                        <div class="form-group">
+                                            <label for="settlement_type">Settlement Type <b class="text-danger">*</b></label>
+                                            <v-select v-model="item.settlement_type" :options="settlement_type_list" label="value" placeholder="Select Settlement Type" :reduce="item => item.id" class="mb-2"></v-select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="method_of_payment_id">Method Of Payment <b class="text-danger">*</b></label>
+                                            <model-list-select :list="method_of_payments"
+                                                v-model="item.method_of_payment_id"
+                                                option-value="id"
+                                                option-text="name"
+                                                class="form-control">
+                                            </model-list-select>
+                                            <input name="method_of_payment_id" v-model="item.method_of_payment_id" hidden>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="payment_specification">Payment Specification</label>
+                                            <input type="text" class="form-control" name="payment_specification" v-model="item.payment_specification" id="payment_specification">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="payment_reference">Payment Reference</label>
+                                            <input type="text" class="form-control" name="payment_reference" v-model="item.payment_reference" id="payment_reference">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="bank_transaction_type">Bank Transaction Type <b class="text-danger">*</b></label>
+                                            <v-select v-model="item.bank_transaction_type" :options="bank_transaction_types" label="name" placeholder="Select Bank Transaction Type" :reduce="item => item.id" class="mb-2"></v-select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="bank_account">Bank Account <b class="text-danger">*</b></label>
+                                            <input type="text" class="form-control" name="bank_account" v-model="item.bank_account" id="bank_account">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h4>&nbsp;</h4><hr>
+                                        <div class="form-group">
+                                            <label for="postdated_check_status_id">Postdated Check Status <b class="text-danger">*</b></label>
+                                            <v-select v-model="item.postdated_check_status_id" :options="postdated_check_statuses" label="value" placeholder="Select Postdated Check Status" :reduce="item => item.id" class="mb-2"></v-select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="check_number">Check Number <b class="text-danger">*</b></label>
+                                            <input type="text" class="form-control" name="check_number" v-model="item.check_number" id="check_number">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="check_number_issued">Check Number Issued <b class="text-danger">*</b></label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input type="text" ref="check_number_issued" class="form-control calendar-form" v-model="item.check_number_issued" id="check_number_issued" name="check_number_issued" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="maturity_date">Maturity Date <b class="text-danger">*</b></label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input type="text" ref="maturity_date" class="form-control calendar-form" v-model="item.maturity_date" id="maturity_date" name="maturity_date" readonly="readonly">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="received_date">Received Date</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                                </div>
+                                                <input type="text" ref="received_date" class="form-control calendar-form    " v-model="item.received_date" id="received_date" name="received_date" readonly="readonly">
+                                            </div>
+                                        </div>
+										<label>Original Check</label>
+										<div class="custom-control custom-switch mb-3 mt-2">
+										<input type="checkbox" class="custom-control-input" id="original_check" name="original_check" v-model="item.original_check">
+											<label class="custom-control-label" for="original_check">
+												<span class="badge" :class="item.original_check ? 'badge-success' : 'badge-danger'">
+													{{ item.original_check ? 'Yes' : 'No'  }}
+												</span>
+											</label>
+										</div>
+                                        <div class="form-group">
+                                            <label for="recepient_name">Recepient Name</label>
+                                            <input type="text" class="form-control" name="recepient_name" v-model="item.recepient_name" id="recepient_name">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h4>&nbsp;</h4><hr>
+                                        <div class="form-group">
+                                            <label for="cashier">Cashier</label>
+                                            <input type="text" class="form-control" name="cashier" v-model="item.cashier" id="cashier">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sales_person">Sales Person</label>
+                                            <input type="text" class="form-control" name="sales_person" v-model="item.sales_person" id="sales_person">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="issuing_bank_branch">Issuing Bank Branch <b class="text-danger">*</b></label>
+                                            <input type="text" class="form-control" name="issuing_bank_branch" v-model="item.issuing_bank_branch" id="issuing_bank_branch">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="issuing_bank_branch_name">Issuing Bank Branch Name <b class="text-danger">*</b></label>
+                                            <input type="text" class="form-control" name="issuing_bank_branch_name" v-model="item.issuing_bank_branch_name" id="issuing_bank_branch_name">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="check_amount">Check Amount <b class="text-danger">*</b></label>
+                                            <input type="number" class="form-control" name="check_amount" v-model="item.check_amount" id="check_amount" readonly="readonly">
+                                        </div>
+                                        <div class="form-group">
+											<label>Stop payment</label>
+											<div class="custom-control custom-switch mb-3 mt-2">
+											<input type="checkbox" class="custom-control-input" id="stop_payment" name="stop_payment" v-model="item.stop_payment">
+												<label class="custom-control-label" for="stop_payment">
+													<span class="badge" :class="item.stop_payment ? 'badge-success' : 'badge-danger'">
+														{{ item.stop_payment ? 'Yes' : 'No'  }}
+													</span>
+												</label>
+											</div>
+                                        </div>
+                                        <div class="form-group">
+											<label>Replacement Check</label>
+											<div class="custom-control custom-switch mb-3 mt-2">
+											<input type="checkbox" class="custom-control-input" id="replacement_check" name="replacement_check" v-model="item.replacement_check">
+												<label class="custom-control-label" for="replacement_check">
+													<span class="badge" :class="item.replacement_check ? 'badge-success' : 'badge-danger'">
+														{{ item.replacement_check ? 'Yes' : 'No'  }}
+													</span>
+												</label>
+											</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Customer Payment Lines -->
+
+                            <div class="tab-pane" id="customer_payment_lines">
+                                <div class="col-md-12 text-right">
+                                    <button type="button" @click="inheritItemLineDetailsFromParent" class="btn btn-outline-primary w-10" data-toggle="modal" data-target="#customer_payment_line_form">
+                                        <i class="fas fa-plus"></i> Add Line
+                                    </button>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label for="total_quantity">Total Quantity</label>
+                                            <input type="number" class="form-control" id="total_quantity" name="total_quantity" v-model="item.total_quantity" readonly="readonly">
+                                        </div>  
+                                        <div class="form-group">
+                                            <label for="total_discount">Total Discount</label>
+                                            <input type="number" class="form-control" id="total_discount" name="total_discount" v-model="item.total_discount" readonly="readonly">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="total_cash_discount">Total Cash Discount</label>
+                                            <input type="number" class="form-control" id="total_cash_discount" readonly="readonly">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <label for="total_charges">Total Charges</label>
+                                            <input type="number" class="form-control" name="total_charges" v-model="item.total_charges" id="total_charges" readonly="readonly">
+                                        </div>
+                                        <div class="form-group text-bottom">
+                                            <label for="total_sales_tax">Total Sales Tax</label>
+                                            <input type="number" class="form-control" name="total_sales_tax" v-model="item.total_sales_tax" id="total_sales_tax" readonly="readonly">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">  
+                                        <div class="form-group">
+                                            <label for="total_round_off">Total Round Off</label>
+                                            <input type="number" class="form-control" id="total_round_off" v-model="item.total_round_off" name="total_round_off" readonly="readonly">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sub_total_amount">Sub Total Amount</label>
+                                            <input type="number" class="form-control" id="sub_total_amount" v-model="item.sub_total_amount" name="sub_total_amount" readonly="readonly">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="total_amount">Total Amount</label>
+                                            <input type="number" class="form-control" id="total_amount" name="total_amount" v-model="item.total_amount" readonly="readonly">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Payment Line #</th>
+                                                    <th>Item Name</th>
+                                                    <th>Status</th>
+                                                    <th>Size</th>
+                                                    <th>Color</th>
+                                                    <th>Quantity</th>
+                                                    <th>Price Per Unit</th>
+                                                    <th>Amount</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr :class="{ 'bg-warning' : isItemLineFormNotValid(itemLine) }" v-for="itemLine in item.itemLines" :key="itemLine.payment_line_number">
+                                                    <td>{{ itemLine.payment_line_number }}</td>
+                                                    <td>{{ itemLine.variant.name }}</td>
+                                                    <td>{{ displayStatusState(itemLine) }}</td>
+                                                    <td>{{ itemLine.variant.size }}</td>
+                                                    <td>{{ itemLine.variant.color }}</td>
+                                                    <td>{{ itemLine.quantity }}</td>
+                                                    <td>{{ itemLine.variant.unit_price }}</td>
+                                                    <td>{{ itemLine.amount }}</td>
+                                                    <td>
+                                                        <template >
+                                                            <button type="button" :disabled="!itemLine.id || (isItemLineFormNotValid(itemLine) && !isNotPending(itemLine)) || isNotPending(itemLine)" class="btn-success btn-sm btn" @click="approveCustomerLine(itemLine)"><i class="fas fa-check"></i> </button>
+                                                            <button type="button" :disabled="!itemLine.id || (isItemLineFormNotValid(itemLine) && !isNotPending(itemLine)) || isNotPending(itemLine)" class="btn-danger btn-sm btn" @click="rejectCustomerLine(itemLine)"><i class="fas fa-times"></i> </button>
+                                                        </template>
+                                                        <button type="button" class="btn btn-info btn-sm" @click="editCustomerLine(itemLine)" data-toggle="modal" data-target="#customer_payment_line_form">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                        <button type="button" :disabled="isNotPending(itemLine)" class="btn btn-danger btn-sm" @click="archiveLine(itemLine)"><i class="fas fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tab-pane" id="checks">
+                                <div class="col-xs-12">
+                                    <div class="card">
+                                        <div class="card-header p-2">
+                                            <ul class="nav nav-pills">
+                                                <li class="nav-item"><a @click="initList('table-7')" class="nav-link active" href="#checks-active" data-toggle="tab">Active</a></li>
+                                                <li class="nav-item"><a @click="initList('table-8')" class="nav-link" href="#checks-archived" data-toggle="tab">Archived</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="tab-content">
+                                                <div class="tab-pane show active" id="checks-active">
+                                                    <check-table 
+                                                        :clients="clients"
+                                                        :fetch-url="checksActive"
+                                                        ref="table-7"
+                                                    ></check-table>
+                                                </div>
+                                                <div class="tab-pane" id="checks-archived">
+                                                    <check-table 
+                                                        :clients="clients"
+                                                        :fetch-url="checksArchived"
+                                                        ref="table-8"
+                                                    ></check-table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="subsidiary_ledger">
+                                <subsidiary-view
+                                    :clients="clients"
+                                    :invoice-approval-url="invoiceApprovalUrl"
+                                    :customer-payment-url="customerPaymentUrl"
+                                    :general-journal-url="generalJournalUrl"
+                                    first-tab-name="Customer Invoice Subsidiary"
+                                    second-tab-name="Customer Payment Subsidiary"
+                                ></subsidiary-view>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </card>
+   
+        
+        <!-- Customer Payment Line Form -->
+        
+        <div class="modal fade" id="customer_payment_line_form" tabindex="-1" role="dialog" aria-labelledby="customer_payment_line_modal_label" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="customer_payment_line_modal_label">Customer Payment Line</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form :key="formKey">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <h4>Details</h4><hr>
+                                    <div class="form-group">
+                                        <label for="line_client_id">Client Id</label>
+                                        <input type="text" class="form-control" name="line_client_id" v-model="clientName"  id="line_client_id" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="payment_line_number">Payment Line Number</label>
+                                        <input type="text" class="form-control" name="payment_line_number" v-model="itemLine.payment_line_number"  id="payment_line_number" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="customer_payment_id">Payment ID</label>
+                                        <input type="text" class="form-control" name="customer_payment_id" v-model="itemLine.customer_payment_id" id="customer_payment_id" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="customer_account_line">Customer Account</label>
+                                        <input type="text" class="form-control" name="customer_account" v-model="itemLine.customer_account" id="customer_account_line" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="line_payee">Payee</label>
+                                        <input type="text" class="form-control" name="payee" v-model="itemLine.payee" id="line_payee" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="line_invoice_account">Invoice Account</label>
+                                        <input type="text" class="form-control" name="invoice_account" v-model="itemLine.invoice_account" id="line_invoice_account" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="invoice_number">Invoice Number</label>
+                                        <input type="text" class="form-control" name="invoice_number" v-model="itemLine.invoice_number" id="invoice_number" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sales_order_number">Sales Order Number</label>
+                                        <input type="text" class="form-control" name="sales_order_number" v-model="itemLine.sales_order_number" id="sales_order_number" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="voucher_number">Voucher Number</label>
+                                        <input type="text" class="form-control" name="voucher_number" v-model="itemLine.voucher_number" id="voucher_number">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4>Status</h4><hr>
+                                    <div class="form-group">
+                                        <label for="line_posted_payment">Posted Payment</label>
+                                        <div class="custom-control custom-switch mb-3 mt-2">
+                                        <input type="checkbox" disabled class="custom-control-input" id="line_posted_payment" v-model="itemLine.posted_payment">
+                                            <label class="custom-control-label" for="line_posted_payment">
+                                                <span class="badge" :class="itemLine.posted_payment ? 'badge-success' : 'badge-danger'">
+                                                    {{ itemLine.posted_payment ? 'Posted' : 'Not Posted'  }}
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="line_issue_date">Posting Date</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                            </div>
+                                            <input type="text" class="form-control" v-model="itemLine.posting_date" id="line_issue_date" name="issue_date" readonly="readonly">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="posting_by_name">Posting By</label>
+                                        <input type="text" class="form-control" name="posting_by_name" v-model="itemLine.posting_by_name" id="posting_by_name" readonly="readonly">
+                                    </div>
+                                    <h4>Sales Tax</h4><hr>
+                                    <div class="form-group">
+                                        <label for="item_sales_tax_group">Item Sales Tax Group</label>
+                                        <input type="text" class="form-control" name="item_sales_tax_group" v-model="itemLine.item_sales_tax_group" id="item_sales_tax_group">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sales_tax_group_line">Sales Tax Group</label>
+                                        <input type="text" class="form-control" name="sales_tax_group" v-model="itemLine.sales_tax_group" id="sales_tax_group_line">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sales_tax_amount">Sales Tax Amount</label>
+                                        <input type="text" class="form-control" name="sales_tax" v-model="itemLine.sales_tax_amount" readonly="readonly" id="sales_tax_amount">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4>Item</h4><hr>
+                                    <div class="form-group">
+                                        <label>Line Status <b class="text-danger">*</b></label>
+                                        <v-select v-model="itemLine.status" :options="item_line_statuses" label="value" placeholder="Select Line Status" :reduce="item => item.id" class="mb-2"></v-select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="item_name">Item Name <b class="text-danger">*</b></label>
+                                        <v-select v-model="itemLine.product_id"  @input="displayRelatedVariants" :options="items" label="name" placeholder="Select Product" :reduce="item => item.id" class="mb-2"></v-select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="variant_id">Variant <b class="text-danger">*</b></label>
+                                        <v-select :disabled="!itemLine.product_id ? true : false" v-model="itemLine.variant_id" @input="findAndInheritVariantDetails" :options="related_variants" label="name" placeholder="Select Variants" :reduce="item => item.id" class="mb-2"></v-select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Procurement Category</label>
+                                        <v-select v-model="itemLine.procurement_category" :options="procurement_categories" label="value" placeholder="Select Procurement Category" :reduce="item => item.value" class="mb-2"></v-select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="size">Size</label>
+                                        <input type="text" class="form-control" name="size" v-model="itemLine.variant.size" id="size" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="color">Color</label>
+                                        <input type="text" class="form-control" name="color" v-model="itemLine.variant.color" id="color" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="line_description">Description</label>
+                                        <input type="text" class="form-control" name="description" v-model="itemLine.description" id="line_description">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4>&nbsp;</h4><hr>
+                                    <div class="form-group">
+                                        <label for="quantity">Quantity <b class="text-danger">*</b></label>
+                                        <input type="number" @input="calculateAmount" class="form-control" name="quantity" v-model="itemLine.quantity" id="quantity">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="purchase_unit">Purchase Unit</label>
+                                        <input type="number" class="form-control" name="purchase_unit" v-model="itemLine.purchase_unit" id="purchase_unit">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="price_per_unit">Price Per Unit <b class="text-dan">*</b></label>
+                                        <input type="number" @input="calculateAmount" class="form-control" name="price_per_unit" v-model="itemLine.price_per_unit" id="price_per_unit">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="set_unit_price">Set Unit Price</label>
+                                        <input type="number" class="form-control" name="set_unit_price" v-model="itemLine.variant.unit_price" id="set_unit_price" readonly="readonly">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="discount">Discount</label>
+                                        <input type="number" @input="calculateAmount" class="form-control" name="discount" v-model="itemLine.discount" id="discount">
+                                    </div>
+                                    <input type="number" v-model="itemLine.total_discount" hidden readonly="readonly">
+                                    <div class="form-group">
+                                        <label for="discount_percentage">Discount Percentage</label>
+                                        <input type="number" @input="calculateAmount" class="form-control" name="discount_percentage" v-model="itemLine.discount_percentage" id="discount_percentage">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="charges_on_purchases">Charges On Purchases</label>
+                                        <input type="number" @input="calculateAmount" class="form-control" name="charges_on_purchases" v-model="itemLine.charges_on_purchases" id="charges_on_purchases">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="amount">Amount <b class="text-danger">*</b></label>
+                                        <input type="number" class="form-control" name="amount" v-model="itemLine.amount" id="amount">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4>Ledger</h4><hr>
+                                    <div class="form-group">
+                                        <label for="subledger_journal">Subledger Journal</label>
+                                        <input type="text" class="form-control" name="subledger_journal" v-model="itemLine.subledger_journal" id="subledger_journal">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ledger_account">Ledger Account</label>
+                                        <input type="text" class="form-control" name="ledger_account" v-model="itemLine.ledger_account" id="ledger_account">
+                                    </div>
+                                    <h4>Financial Dimension</h4><hr>
+                                    <div class="form-group">
+                                        <label>Cost Center <b class="text-danger">*</b></label>
+                                         <v-select v-model="itemLine.dimension_value_cost_center_id" :options="cost_centers" label="dimension_name" placeholder="Select Cost Center" :reduce="item => item.id" class="mb-2"></v-select> 
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Department <b class="text-danger">*</b></label>
+                                         <v-select v-model="itemLine.dimension_value_department_id" :options="departments" label="dimension_name" placeholder="Select Department" :reduce="item => item.id" class="mb-2"></v-select>
+                                        <input name="dimension_value_department_id" v-model="itemLine.dimension_value_department_id" hidden>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Expense Purpose <b class="text-danger">*</b></label>
+                                        <v-select v-model="itemLine.dimension_value_expense_purpose_id" :options="expense_purposes" label="dimension_name" placeholder="Select Expense Purpose" :reduce="item => item.id" class="mb-2"></v-select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <h4>Audit</h4><hr>
+                                    <div class="form-group">
+                                        <label for="line_created_by">Created By</label>
+                                        <input type="text" class="form-control" v-model="itemLine.created_by_user.fullname" id="line_created_by" name="created_by" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="line_created_on">Created On</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                            </div>
+                                            <input ref="line_created_on" type="text" class="form-control" v-model="itemLine.created_at" id="line_created_on" name="created_on" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="line_updated_by">Updated By</label>
+                                        <input ref="line_updated_by" type="text" class="form-control" v-model="itemLine.updated_by_user.fullname" id="line_updated_by" name="issue_date" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="line_updated_on">Updated On</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                            </div>
+                                            <input ref="updated_on" type="text" class="form-control" id="line_updated_on" v-model="itemLine.updated_at" name="updated_on" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" :disabled="isNotPending(itemLine) || isItemLineFormNotValid(itemLine)" class="btn btn-primary" @click="saveLine">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+             </form-request>
+    </div>
+</template>
+
+<script>
+	import CrudMixin from 'Mixins/crud.js';
+    import ResponseMixin from 'Mixins/response.js';
+    import SetupMixin from 'Mixins/setup.js';
+    import Card from 'Components/containers/Card.vue';
+    import Datepicker from 'vuejs-datepicker';
+    import flatpickr from 'flatpickr';
+	import { ModelListSelect } from 'vue-search-select'
+	import FormRequest from 'Components/forms/FormRequest.vue';
+    import Vselect from 'vue-select';
+    
+    export default {
+        mixins: [ CrudMixin, ResponseMixin, SetupMixin ],
+        
+        props: {
+            customerInvoiceCode : String,
+            paymentNumber: String,
+            submitItemLineUrl: String,
+
+            invoiceApprovalUrl: String,
+            customerPaymentUrl: String,
+            generalJournalUrl: String,
+
+            checksActive: String,
+            checksArchived: String,
+        },
+
+		components: {
+            'form-request': FormRequest,
+            'card': Card,
+		    'datepicker': Datepicker,
+            'v-select' : Vselect,  
+			ModelListSelect
+        },
+        
+        computed: {
+			hasNoApprovedLine() {
+                if (! this.item.itemLines) return false;
+                var approvedItem = this.item.itemLines.find(item => item.approved_by_id != null);
+                return approvedItem == null;
+            }
+        },
+
+        data() {            
+            return {
+                client_id : null,
+                item: { itemLines: [] },
+                itemLine: this.defaultItemLine(),
+                formKey: 0,
+                customer_invoices: [],
+                customers: [],
+                items: [],
+                variants: [],
+                related_variants: [],
+                method_of_payments: [],
+                cost_centers: [],
+                expense_purposes: [],
+                departments: [],
+                settlement_type_list: [],
+                bank_transaction_types: [],
+                postdated_check_statuses: [],
+                clients: [],
+                item_line_statuses: [],
+                clientName: null,
+                procurement_categories: [ 
+                    { value: "Air" }, 
+                    { value: "Land" }, 
+                    { value: "Sea" }
+                ],
+                payment_statuses: [
+                    { value: 'None' },
+                    { value: 'Sent' },
+                    { value: 'Received' },
+                    { value: 'Approved' },
+                    { value: 'Rejected' }
+                ],
+                transaction_types: ['Sales', 'Purchase', 'Both'],
+                posting_profiles: [],
+            }
+        },
+
+        // watch the data value change 
+        watch : {
+            'item.customer_invoice_id'(value) {
+                if(value && !this.item.id) {
+                    this.inheritInvoiceCustomerAccount(value);
+                }
+            },
+
+            'item.client_id'(value) {
+                this.item.itemLines.forEach(line => {
+                    line.client_id = value;
+                    this.inheritClientName(value);
+                });
+            },
+
+            'item.payee'(value) {
+                if (this.timeout) {
+                    clearTimeout(this.timeout);
+                }
+
+                this.timeout = setTimeout(() => {
+                    if (value) {
+                        if (this.item.itemLines) {
+                            this.item.itemLines.forEach((item, index) => {
+                                item.payee = value;
+                            });
+                        }
+                    }
+                }, 200);
+            },
+
+            'client_id'(value){
+				this.item.client_id = value;
+				this.getActiveCode();
+			},
+        },
+
+        mounted() {
+
+            flatpickr(this.$refs.issue_date);
+            flatpickr(this.$refs.payment_release_date);
+            flatpickr(this.$refs.clearing_date);
+            flatpickr(this.$refs.due_date);
+            flatpickr(this.$refs.check_number_issued);
+            flatpickr(this.$refs.maturity_date);
+            flatpickr(this.$refs.received_date);
+
+            this.settlement_type_list = [
+                { id: 1, value: 'None' },
+                { id: 2, value: 'Open Transactions' },
+                { id: 3, value: 'Designated Transactions' },
+            ];
+
+            this.item_line_statuses = [
+                { id: 1, value: 'None' },
+                { id: 2, value: 'Sent' },
+                { id: 3, value: 'Received' },
+                { id: 4, value: 'Approved' },
+                { id: 5, value: 'Rejected' }
+            ]
+
+            this.bank_transaction_types = [
+                { id: 1,name: 'Deposit' },
+                { id: 2,name: 'Deposit-Electronic' },
+                { id: 3,name: 'Payment-Fixed' },
+                { id: 4,name: 'Payment-Manual' },
+                { id: 5,name: 'Payment-Electronic' },
+                { id: 6,name: 'Transfer' },
+                { id: 7,name: 'Transfer-Wire' },
+                { id: 8,name: 'Non-sufficient '}
+            ];
+
+            this.postdated_check_statuses = [
+                { id: 1, value: 'Open' },
+                { id: 2, value: 'On hold' },
+                { id: 3, value: 'Paid' },
+                { id: 4, value: 'Posted' },
+                { id: 5, value: 'Cancelled' }
+            ];
+
+            this.initItem();
+        },
+
+        methods: {
+            fetchSuccess(data) {
+                this.item = data.item ?? this.item;
+          
+                this.customers = data.customers ?? this.customers;
+                this.items = data.items ?? this.items;
+                this.variants = data.variants ?? this.variants;
+                this.method_of_payments = data.method_of_payments ?? this.method_of_payments;
+                this.cost_centers = data.cost_centers ?? this.cost_centers;
+                this.expense_purposes = data.expense_purposes ?? this.expense_purposes;
+                this.departments = data.departments ?? this.departments;
+                this.settlement_type_list = data.settlement_type_list ?? this.settlement_type_list;
+
+                this.clients = data.clients ?? this.clients;
+                
+                this.customer_invoices = data.customer_invoices ?? this.customer_invoices;
+                this.posting_profiles = data.posting_profiles ?? this.posting_profiles;
+
+                if (this.customerInvoiceCode) {
+                    this.assignInvoiceNumber(this.customerInvoiceCode);
+                }
+
+            },
+
+            saveLine() {
+                $('#customer_payment_line_form').modal('hide');
+                if (! this.item.itemLines) {
+                    this.item['itemLines'] = [];
+                }
+
+                const itemLineIndex = this.item.itemLines.findIndex(itemLine => itemLine.payment_line_number == this.itemLine.payment_line_number);
+                if (itemLineIndex != -1) {
+                    // update new item line
+                    this.item.itemLines[itemLineIndex] = this.itemLine;
+                } else {
+                    // create new item line
+                    this.item.itemLines.push(this.itemLine);
+                }
+                this.computecustomerPaymentLines();
+                this.resetItemLine();
+            },
+
+            // Computer Vneodr Payment in Header
+            computecustomerPaymentLines() {
+                this.item.total_quantity = 0;
+                this.item.total_discount = 0;
+                this.item.total_sales_tax = 0;
+                this.item.total_charges = 0;
+                this.item.sub_total_amount = 0;
+                this.item.total_amount = 0;
+                this.total_round_off = 0;
+                
+                this.item.itemLines.forEach((itemLine, _) => {
+                    this.item.total_quantity += 1*itemLine.quantity || 0;
+                    this.item.total_discount += 1*itemLine.total_discount || 0; // round
+                    this.item.total_sales_tax += 1*itemLine.sales_tax_amount || 0; // round
+                    this.item.total_charges += 1*itemLine.charges_on_purchases || 0; // round
+                    this.item.sub_total_amount += 1*itemLine.sub_total_amount || 0;
+                    this.item.total_amount += 1*itemLine.amount || 0;
+                });
+
+                this.item.total_discount = this.roundNumber(this.item.total_discount);
+                this.item.total_sales_tax = this.roundNumber(this.item.total_sales_tax);
+                this.item.total_round_off = Math.round(this.item.total_amount);
+                this.item.sub_total_amount = this.roundNumber(this.item.sub_total_amount);
+
+                this.item.total_charges = this.roundNumber(this.item.total_charges);
+                this.item.total_amount = this.roundNumber(this.item.total_amount);
+
+                this.item.check_amount = this.item.total_amount;
+            },
+
+            initItem() {
+                this.item = {
+                    settlement_type: null,
+                    itemLines: [],
+                    dimension_value_cost_center_id: null,
+                    dimension_value_department_id: null,
+                    dimension_value_expense_purpose_id: null,
+                    method_of_payment_id: null,
+                    payment_status: 'None',
+                    transaction_type: 'Sales',
+                    customer_account_id: null,
+                };
+                if (this.paymentNumber) {
+                    this.generateID();
+                }
+            },
+
+            // inherit similar attributes from customer invoice
+            inheritInvoiceCustomerAccount(invoiceId) {
+                // TODO: change this to binary search
+                // TODO: better yet use axios to GET this from the backend
+                // rushing us so yeah...
+                const invoice = this.customer_invoices.find(invoice => invoice.id == invoiceId);
+                const customer = this.customers.find(customer => customer.customer_account == invoice.customer_account);
+                // header inherit
+                this.item.transaction_type = invoice.transaction_type;
+                this.item.customer_account_id = customer.id;
+                this.item.customer_account = invoice.customer_account;
+                this.item.invoice_account = invoice.invoice_account;
+                this.item.customer_name = invoice.customer_name;
+                this.item.customer_address = invoice.customer_address;
+                this.item.customer_contact_id = invoice.customer_contact_id;
+
+                this.item.due_date = invoice.payment_due_date;
+                this.item.payment_release_date = invoice.invoice_payment_release_date ?? this.item.payment_release_date;
+                this.item.sales_tax_group = invoice.sales_tax_group;
+                this.item.tax_exempt_group = invoice.tax_exempt_number;
+                this.item.cash_discount = invoice.cash_discount;
+                this.item.cash_discount_code = invoice.cash_discount_code;
+
+                this.item.prices_included_sales_tax = invoice.prices_include_sales_tax_checkbox;
+                this.item.ignore_calculated_tax = invoice.ignore_calculated_sales_tax_checkbox;
+                this.client_id = invoice.client_id;
+
+                // Financial Dimension inherit
+                this.item.dimension_value_cost_center_id = invoice.cost_center_id;
+                this.item.dimension_value_department_id = invoice.department_id;
+                this.item.dimension_value_expense_purpose_id = invoice.expense_purpose_id;
+
+                this.item.posting_profile = invoice.posting_profile;
+                this.item.accounting_distribution = invoice.accounting_distribution;
+                
+                // Check Payment Inherit
+                const settlement_type = this.settlement_type_list.find(settlement_type => settlement_type.value == 'Open Transactions');
+                if (settlement_type) {
+                    this.item.settlement_type = settlement_type.id;
+                }
+                this.item.method_of_payment_id = 1*invoice.method_of_payment;
+                this.item.payment_specification = invoice.payment_specification;
+
+                const itemLines = [];
+                invoice.customer_invoice_lines.forEach((item, index) => {
+                    const itemLine = this.defaultItemLine();
+                    itemLine.customer_account = this.item.customer_account;
+                    itemLine.customer_id = this.item.customer_account_id;
+                    itemLine.payee = this.item.payee;
+                    itemLine.invoice_account = this.item.invoice_account;
+
+                    itemLine.payee = this.item.payee;
+
+                    itemLine.invoice_number = invoice.customer_invoice_number;
+                    itemLine.sales_order_number = invoice.sales_order_number;
+
+                    itemLine.payment_line_number = this.generateLineNumber();
+                    itemLine.customer_invoice_id = invoice.id;
+                    itemLine.item_sales_tax_group = item.item_sales_tax_group;
+                    itemLine.sales_tax_group = item.sales_tax_group;
+                    
+                    itemLine.procurement_category = item.procurement_category;
+
+                    // inheirt line product
+                    const product = this.items.find(_item => _item.id == item.product_id);
+                    itemLine.item = product;
+                    if (product) {
+                        itemLine.product_id = product.id;
+                        itemLine.quantity = item.quantity;
+                        itemLine.price_per_unit = this.roundNumber(1*item.unit_price || 0);
+                        itemLine.discount_percentage = item.discount_percentage || 0;
+                        itemLine.variant_id = item.variant.id;
+                        this.inheritVariantDetails(item.variant, itemLine);
+                        this.itemLine = itemLine;
+                        this.calculateAmount();
+                        this.resetItemLine();
+                    }
+                    itemLine.subledger_journal = item.subledger_journal;
+                    itemLine.ledger_account = item.ledger_account;
+
+                    // inherit item line financial dimension
+                    itemLine.dimension_value_cost_center_id = invoice.cost_center_id;
+                    itemLine.dimension_value_department_id = invoice.department_id;
+                    itemLine.dimension_value_expense_purpose_id = invoice.expense_purpose_id;
+
+                    itemLines.push(itemLine);   
+                });
+                this.item.itemLines = itemLines;
+                this.computecustomerPaymentLines(); 
+            },
+
+            findCostCenter(code) {
+                // TODO: refactor this to axios get or binary search
+                //       rushing us so yeah...
+                return this.cost_centers.find(cost_center => cost_center.financial_dimension_value_code == code);
+            },
+
+            findDepartment(code) {
+                // TODO: refactor this to axios get or binary search
+                //       rushing us so yeah...
+                return this.departments.find(department => department.financial_dimension_value_code == code);
+            },
+
+            findExpensePurpose(code) {
+                // TODO: refactor this to axios get or binary search
+                //       rushing us so yeah...
+                return this.expense_purposes.find(expense_purpose => expense_purpose.financial_dimension_value_code == code);
+            },
+
+            displayRelatedVariants(itemId) {
+                this.itemLine.item = this.items.find(item => item.id == itemId);
+                this.setRelatedVariants(itemId);
+            },
+
+            setRelatedVariants(itemId) {
+                this.related_variants = this.variants.filter(variant => variant.product_id == itemId);
+            },
+
+            findAndInheritVariantDetails(itemId) {
+                // TODO: change this to binary search
+                // TODO: better yet use axios to GET this from the backend
+                // rushing us so yeah...
+                const variant = this.related_variants.find(variant => variant.id == itemId);
+                this.inheritVariantDetails(variant);
+            },
+
+            inheritVariantDetails(variant, itemLine) {
+                if (! itemLine) {
+                    itemLine = this.itemLine;
+                }
+
+                if (variant) {
+                    delete variant.quantity;
+                    delete variant.is_available;
+                    itemLine.variant = variant;
+                }
+            },
+
+            generateLineNumber() {
+                var date = new Date();
+                var time = Math.round(date.getTime() / 1000);
+                var lineNumber = date.getDate().toString() + date.getMonth().toString() + date.getFullYear().toString() +'-'+ time.toString();
+                lineNumber += "-" + Math.random().toString(36).substring(2, 6);
+                return lineNumber;
+            },
+
+            inheritItemLineDetailsFromParent() {
+                
+                this.resetItemLine();
+                this.itemLine.payment_line_number = this.generateLineNumber();
+
+                this.itemLine.customer_account = this.item.customer_account;
+                this.itemLine.customer_id = this.item.customer_account_id;
+                this.itemLine.payee = this.item.payee;
+                this.itemLine.invoice_account = this.item.invoice_account;
+                this.itemLine.customer_payment_id = this.item.id;
+                this.itemLine.dimension_value_cost_center_id = this.item.dimension_value_cost_center_id;
+                this.itemLine.dimension_value_expense_purpose_id = this.item.dimension_value_expense_purpose_id;
+                this.itemLine.dimension_value_department_id = this.item.dimension_value_department_id;
+
+                const invoice = this.customer_invoices.find(invoice => invoice.id == this.item.customer_invoice_id);
+                if (invoice) {
+                    this.itemLine.invoice_number = invoice.customer_invoice_number;
+                    this.itemLine.customer_invoice_id = invoice.id;
+                    this.itemLine.sales_order_number = invoice.sales_order_number;
+                }
+
+                this.inheritClientName(this.item.client_id);
+
+                this.formKey += 1;
+            },
+
+            inheritClientName(clientId) {
+                const client = this.clients.find(client => client.id == clientId) ?? {};
+                this.clientName = client.name;
+            },
+
+            calculateAmount() {
+                this.itemLine.total_discount = 0;
+                if (this.itemLine.price_per_unit && this.itemLine.quantity) {
+                    this.itemLine.sub_total_amount = this.itemLine.price_per_unit * this.itemLine.quantity;
+                    this.itemLine.amount = this.itemLine.sub_total_amount;
+                    if (this.itemLine.discount) {
+                        this.itemLine.total_discount = 1*this.itemLine.discount;
+                        this.itemLine.amount -= this.itemLine.discount;
+                    } else {
+                        this.itemLine.discount = 0;
+                    }
+                    if (this.itemLine.discount_percentage) {
+                        const discount_percent_value = this.itemLine.amount * (this.itemLine.discount_percentage / 100);
+                        this.itemLine.total_discount += 1*discount_percent_value; 
+                        this.itemLine.amount -= discount_percent_value;
+                    } else {
+                        this.itemLine.discount_percentage = 0;
+                    }
+                    this.itemLine.sub_total_amount = this.roundNumber(this.itemLine.sub_total_amount);
+                    this.itemLine.total_discount = this.roundNumber(this.itemLine.total_discount);
+                    this.itemLine.sales_tax_amount = this.roundNumber(this.itemLine.amount * .12);
+
+                    // total charges are computed before sales tax computation
+                    if (this.itemLine.charges_on_purchases) {
+                        this.itemLine.amount -= this.itemLine.charges_on_purchases;
+                    }
+
+                    this.itemLine.amount -= this.itemLine.sales_tax_amount;
+                    this.itemLine.amount = this.roundNumber(this.itemLine.amount);
+                }
+            },
+
+
+            inputInheritCustomerAccount(customerId) {
+                const customer = this.customers.find(customer => customer.id == customerId);
+                if (customer) {
+                    this.item.customer_account_id = customer.id;
+                    this.item.customer_account = customer.customer_account;
+                    this.item.invoice_account = customer.customer_account;
+                    this.item.customer_name = customer.fullname;
+                    this.item.customer_address = `${customer.shipping_street}, ${customer.shipping_city}, ${customer.shipping_province}, ${customer.shipping_postal_code}, ${customer.shipping_country}`;
+                    this.item.customer_contact_id = customer.fullname;
+
+                    this.item.itemLines.forEach(line => {
+                        line.customer_account = this.item.customer_account
+                        line.customer_id = this.item.customer_account_id;
+                        line.invoice_account = this.item.invoice_account;
+                    });
+                } else {
+                    this.item.customer_account = null;
+                    this.item.invoice_account = null;
+                    this.item.customer_name = null;
+                    this.item.customer_address = null;
+                    this.item.customer_contact_id = null;
+
+                    this.item.itemLines.forEach(line => {
+                        line.customer_account = null;
+                        line.customer_id = null;
+                        line.invoice_account = null;
+                    });
+                }
+            },
+
+            archiveLine(itemLine) {
+                var index = this.item.itemLines.findIndex(line => line.payment_line_number == itemLine.payment_line_number);
+                this.item.itemLines.splice(index, 1);
+                
+                // request to backend to archive itemLine
+                if (itemLine.id) {
+                    if (! this.item.removeItemLines) {
+                        this.item.removeItemLines = [];
+                    }
+                    this.item.removeItemLines.push(itemLine.id);
+                }
+
+                this.computecustomerPaymentLines();
+            },
+            
+
+            rejectCustomerLine(itemLine) {
+                itemLine.is_rejected = true;
+                itemLine.approved_payment = false;
+
+                var index = this.item.itemLines.findIndex(line => line.payment_line_number == itemLine.payment_line_number);
+                this.item.itemLines.splice(index, 1);
+
+                // request to backend to reject this itemLine
+                if (itemLine.id) {
+                    if (! this.item.rejectItemLines) {
+                        this.item.rejectItemLines = [];
+                    }
+                    this.item.rejectItemLines.push(itemLine);
+                }
+
+                this.computecustomerPaymentLines();
+            },
+
+            approveCustomerLine(itemLine) {
+                itemLine.approved_payment = true;
+                itemLine.is_rejected = false;
+            },
+
+            editCustomerLine(itemLine) {
+                this.setRelatedVariants(itemLine.product_id);
+                if (! itemLine.created_by_user) {
+                    itemLine.created_by_user = {};
+                }
+                if (! itemLine.updated_by_user) {
+                    itemLine.updated_by_user = {};
+                }
+                this.itemLine = Object.assign({}, itemLine);
+            },
+
+            roundNumber(number) {
+                return Math.round((number + Number.EPSILON) * 100) / 100;
+            },
+
+            displayStatusState(itemLine) {
+                if (itemLine.approved_payment == 1) {
+                    return "Approved";
+                }
+                if (itemLine.is_rejected == 1) {
+                    return "Rejected";
+                }
+                return "Pending";
+            },
+
+            isNotPending(itemLine) {
+                return this.displayStatusState(itemLine) != 'Pending';
+            },
+
+            resetItemLine() {
+                this.itemLine = this.defaultItemLine();
+            },
+
+            defaultItemLine() {
+                return {
+                    variant_id: null,
+                    variant: {}, 
+                    created_by_user: {}, 
+                    updated_by_user: {}, 
+                    dimension_value_cost_center_id: null,
+                    dimension_value_expense_purpose_id: null,
+                    dimension_value_department_id: null,
+                    approved_payment: false, 
+                    is_rejected: false 
+                }
+            },
+
+            assignInvoiceNumber(value) {
+                const invoice_id = parseInt(value)
+                this.item.customer_invoice_id = parseInt(invoice_id);
+                this.inheritInvoiceCustomerAccount(parseInt(invoice_id));
+            },
+
+            areItemLinesValid(itemLines) {
+                return itemLines.find(itemLine => !this.isItemLineFormNotValid(itemLine)) !== undefined;
+            },
+
+            isItemLineFormNotValid(itemLine) {
+                const quantity = itemLine.quantity || 0;
+                const price_per_unit = itemLine.price_per_unit || 0;
+                return !itemLine.status || !itemLine.product_id || !itemLine.variant_id ||
+                        !itemLine.dimension_value_cost_center_id || 
+                        !itemLine.dimension_value_expense_purpose_id ||
+                        !itemLine.dimension_value_department_id ||
+                        quantity < 1 || price_per_unit < 1;
+            },
+
+            confirmThisForm() {
+                swal.fire({
+                    icon: 'warning',
+                    title: 'Approve this form?',
+                    confirmButtonText: 'Approve',
+                    showCancelButton: true,
+                    cancelButtonText: 'Cancel',
+                }).then(async result => {
+                    if (result.value) {
+                        this.$loading.show(true);
+                        try {
+                            var response = await axios.post(this.item.approvalUrl);
+                            this.$notification.show(response.data.message, 'Success');
+                            this.fetch();
+                            this.$loading.show(false);
+                        } catch (err) {
+                            swal.fire({
+                                icon: 'error',
+                                title: 'Failed to approve'
+                            });
+                            console.error(err, 'err');
+                            this.$loading.show(false);
+                        }
+                    }
+                });
+            },
+
+            postedThisForm() {
+                swal.fire({
+                    icon: 'warning',
+                    title: 'Set this form as posted?',
+                    confirmButtonText: 'Post',
+                    showCancelButton: true,
+                    cancelButtonText: 'Cancel',
+                }).then(async result => {
+                    if (result.value) {
+                        this.$loading.show(true);
+                        try {
+                            var response = await axios.post(this.item.postUrl);
+                            this.$notification.show(response.data.message, 'Success');
+                            this.fetch();
+                            if (response.data.redirect) {
+                                window.location.href = response.data.redirect;
+                            }
+                            this.$loading.show(false);
+                        } catch(err) {
+                            this.parseError(err, null, {});
+                            this.$loading.show(false);                        
+                        }
+                    }
+                });
+            },
+
+            generateID() {
+			    this.item['customer_payment_number'] = this.paymentNumber;
+			},
+
+			getActiveCode() {
+				let id = this.item.client_id;
+				if(id) {
+					let client = this.clients.filter(item => item.id == id)[0];
+					if(client.code) {	
+						this.item.customer_payment_number = client.code;
+					}else {
+						this.generateID();
+					}	
+				}else {
+                    this.generateID();
+                }
+			}
+        }
+    }
+</script>

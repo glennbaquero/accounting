@@ -1,0 +1,451 @@
+<template>
+	<div>
+		<!-- <form-request :submit-url="submitUrl"> -->
+			<card>
+				<template v-slot:header>Customer Payment Information</template>
+
+				<div class="row">
+					<div class="col-md-3 row">
+						<div class="col-md-12">
+							<label>Balance</label>
+						</div>
+						<div class="col-md-12">
+							Journal <input type="text" name="" :value="balanceJournal" class="form-control" disabled>
+						</div>
+						<div class="col-md-12">
+							Per voucher <input type="text" name="" :value="balancePerVoucher" class="form-control" disabled>
+						</div>
+					</div>
+					<div class="col-md-3 row">
+						<div class="col-md-12">
+							<label>Total debit</label>
+						</div>
+						<div class="col-md-12">
+							Journal <input type="text" name="" value="0.00"  :value="debitJournal" class="form-control" disabled>
+						</div>
+						<div class="col-md-12">
+							Per voucher <input type="text" name="" value="0.00" :value="debitPerVoucher" class="form-control" disabled>
+						</div>
+					</div>
+					<div class="col-md-3 row">
+						<div class="col-md-12">
+							<label>Total credit</label>
+						</div>
+						<div class="col-md-12">
+							Journal <input type="text" name="" value="0.00" :value="creditJournal" class="form-control" disabled>
+						</div>
+						<div class="col-md-12">
+							Per voucher <input type="text" name="" value="0.00" :value="creditPerVoucher" class="form-control" disabled>
+						</div>
+					</div>
+
+				</div>
+				<div class="card mt-4">
+				    <div class="card-header p-2">
+				        <ul class="nav nav-pills">
+				            <li class="nav-item"><a class="nav-link active" href="#overview" data-toggle="tab">Overview</a></li>
+				            <li class="nav-item"><a class="nav-link" href="#general" data-toggle="tab">General</a></li>
+				            <li class="nav-item"><a class="nav-link" href="#payment" data-toggle="tab">Payment</a></li>
+				            <li class="nav-item"><a class="nav-link" href="#payment_fee" data-toggle="tab">Payment Fee</a></li>
+				            <li class="nav-item"><a class="nav-link" href="#remittance" data-toggle="tab">Remittance</a></li>
+				            <li class="nav-item"><a class="nav-link" href="#bank" data-toggle="tab">Bank</a></li>
+				        </ul>
+				    </div>
+				    <div class="card-body">
+				        <div class="tab-content">
+				        	<div class="tab-pane show active" id="overview">
+				        		<div class="row">
+						    		<div class="col-sm-12">
+						    			<div class="table-responsive">
+						    			    <data-table 
+						    			    	ref="data-table"
+						    			    	:headers="headers" 
+						    			    	:items="items"
+						    			    	:striped="false"
+						    			    	
+						    			    >
+						    			    	<!-- <tr>
+						    			    		<th v-for="header in headers">{{ header.text }}</th>
+						    			    	</tr> -->
+						    			    	<template v-slot:body="{ items }">
+						    			    		<tr v-for="item in items" @click="selectedLine(item)" :class="item.selected ? 'selected-table' : ''">
+						    			    		    <td>
+						    			    		    	<input type="checkbox" name="" @change="dataSelected(item)">
+						    			    		    </td>
+						    			    		    <td>{{ item.date }}</td>
+						    			    		    <td>{{ item.company_account }}</td>
+						    			    		    <td>{{ item.account }}</td>
+						    			    		    <td>{{ item.description }}</td>
+						    			    		    <td>{{ item.debit }}</td>
+						    			    		    <td>{{ item.credit }}</td>
+						    			    		    <td>{{ item.offset_account_type }}</td>
+						    			    		    <td>{{ item.offset_account }}</td>
+						    			    		</tr>
+						    			    	</template>
+				                        	</data-table>
+				                        	</table>
+					                    </div>
+						    		</div>
+						    		<div class="col-sm-4 row mt-4">
+						    			<div class="col-sm-12">
+						    				Voucher: 
+						    				<input type="text" name="" class="form-control input-sm" v-model="selected.voucher" disabled>
+						    			</div>
+						    			<div class="col-sm-12">
+						    				Currency: 
+						    				<select v-model="selected.currency" class="form-control input-sm">
+						    					<option value="PHP">PHP</option>
+						    					<option value="USD">USD</option>
+						    				</select>
+						    			</div>
+						    			<div class="col-sm-12">
+						    				Account name: 
+						    				<input type="text" name="" class="form-control input-sm" v-model="selected.account_name" disabled>
+						    			</div>
+						    			<div class="col-sm-12">
+						    				Offset account name: 
+						    				<input type="text" name="" class="form-control input-sm" v-model="selected.offset_account_name" disabled>
+						    			</div>
+						    		</div>
+						    		<div class="col-sm-4 row mt-4">
+						    			<div class="col-sm-12">
+						    				Method of payment: 
+						    				<select v-model="selected.method_of_payments" class="form-control input-sm">
+						    					<option value="CHECK">CHECK</option>
+						    					<option value="CASH">CASH</option>
+						    				</select>
+						    			</div>
+						    			<div class="col-sm-12">
+						    				Payment specification: 
+						    				<select v-model="selected.payment_specification" class="form-control input-sm">
+						    					<option value="PHP">PHP</option>
+						    					<option value="USD">USD</option>
+						    				</select>
+						    			</div>
+						    			<div class="col-sm-12">
+						    				Payment ID: 
+						    				<input type="text" name="" class="form-control input-sm" v-model="selected.payment_id" >
+						    			</div>
+						    			<div class="col-sm-12">
+						    				Settlement type: 
+						    				<input type="text" name="" class="form-control input-sm" v-model="selected.settlement_type" disabled>
+						    			</div>
+						    			<div class="col-sm-12">
+						    				Check number: 
+						    				<input type="text" name="" class="form-control input-sm" v-model="selected.check_number" disabled>
+						    			</div>
+						    		</div>
+						    		<div class="col-sm-4 row mt-4">
+						    			<div class="col-sm-12">
+						    				Document: 
+						    				<input type="text" name="" class="form-control input-sm" v-model="selected.document" >
+						    			</div>
+						    			<div class="col-sm-12">
+						    				Document date: 
+							              	<datepicker format="M/dd/yyyy"  v-model="selected.document_date" name="document_date" input-class="form-control input-sm"></datepicker>
+						    			</div>
+						    			<div class="col-sm-12">
+						    				Withholding tax group: 
+						    				<input type="text" name="" class="form-control input-sm" v-model="selected.withholding_tax_group" disabled>
+						    			</div>
+						    		</div>
+								</div>
+				        	</div>
+				        </div>
+				    </div>
+				</div>
+				
+				
+				<template v-slot:footer>
+					<button type="button" class="btn btn-sm btn-primary">SAVE</button>
+				</template>
+			</card>
+			
+		<!-- </form-request> -->
+	</div>
+</template>
+
+<script>
+
+	import Selectize from 'vue2-selectize';
+	import selectizecss from 'selectize/dist/css/selectize.css';
+
+	import Datepicker from 'vuejs-datepicker';
+    import DataTable from 'Components/tables/DataTable.vue';
+
+	import Card from 'Components/containers/Card.vue';
+	import FormRequest from 'Components/forms/FormRequest.vue';
+
+	export default {
+		props: {
+			submitUrl: String
+		},
+
+        computed: {
+            headers() {
+                let array = [
+                    { text: '', value: '' },
+                    { text: 'Date', value: null },
+                    { text: 'Company accounts', value: null },
+                    { text: 'Account', value: null },
+                    { text: 'Description', value: null },
+                    { text: 'Debit', value: null },
+                    { text: 'Credit', value: null },
+                    { text: 'Offset account type', value: null },
+                    { text: 'Offset account', value: null },
+                ];
+
+                return array;
+            },
+
+            balanceJournal() {
+            	var credit = 0;
+            	var debit = 0;
+
+            	credit = _.sumBy(this.items, (item) => {
+            		return parseFloat(item.credit);
+            	});
+
+            	debit = _.sumBy(this.items, (item) => {
+            		return parseFloat(item.debit);
+            	});
+
+            	return parseFloat(credit - debit);
+            },
+
+            balancePerVoucher() {
+            	var credit = 0;
+            	var debit = 0;
+
+            	credit = _.sumBy(this.items, (item) => {
+            		if(item.alreadyInSelectedItem) {
+	            		return parseFloat(item.credit);
+            		} else {
+            			return 0;
+            		}
+            	});
+
+            	debit = _.sumBy(this.items, (item) => {
+            		if(item.alreadyInSelectedItem) {
+	            		return parseFloat(item.debit);
+            		} else {
+            			return 0;
+            		}
+            	});
+
+            	return parseFloat(credit - debit);
+            },
+
+            debitJournal() {
+            	return _.sumBy(this.items, (item) => {
+            		return parseFloat(item.debit);
+            	});
+            },
+
+            debitPerVoucher() {
+            	return _.sumBy(this.items, (item) => {
+            		if(item.alreadyInSelectedItem) {
+	            		return parseFloat(item.debit);
+            		} else {
+            			return 0;
+            		}
+            	});
+            },
+
+
+            creditJournal() {
+            	return _.sumBy(this.items, (item) => {
+            		return parseFloat(item.credit);
+            	});
+            },
+
+            creditPerVoucher() {
+            	return _.sumBy(this.items, (item) => {
+            		if(item.alreadyInSelectedItem) {
+	            		return parseFloat(item.credit);
+            		} else {
+            			return 0;
+            		}
+            	});
+            },
+        },
+
+		data() {
+			return {
+                items: [
+                    {
+                        id: 1,
+                        date: '11/11/2020',
+                        company_account: 'chap',
+                        account: 'chap-000000',
+                        invoice: '10001',
+                        description: null,
+                        debit: 0,
+                        credit: 1275.00,
+                        offset_account_type: 'Bank',
+                        offset_account: '7000-001-201-101',
+
+                        selected: false,
+                        alreadyInSelectedItem: false,
+
+						voucher: 'chap-APP',
+						currency: 'USD',
+						account_name: 'Corbin Supply',
+						offset_account_name: 'Operating Bank Account',
+						method_of_payments: 'CHECK',
+						payment_specification: null,
+						payment_id: null,
+						settlement_type: 'Designated Transaction',
+						check_number: null,
+						document: null,
+						document_date: '10/11/2020',
+						withholding_tax_group: null                       
+                    },
+                    {
+                        id: 2,
+                        date: '10/21/2020',
+                        company_account: 'chap',
+                        account: 'chap-000000',
+                        invoice: '10001',
+                        description: null,
+                        debit: 0,
+                        credit: 1500.00,
+                        offset_account_type: 'Bank',
+                        offset_account: '7000-001-201-101',
+
+                        selected: false,
+                        alreadyInSelectedItem: false,
+
+						voucher: 'chap-APP',
+						currency: 'USD',
+						account_name: 'Corbin Supply',
+						offset_account_name: 'Operating Bank Account',
+						method_of_payments: 'CHECK',
+						payment_specification: null,
+						payment_id: null,
+						settlement_type: 'Designated Transaction',
+						check_number: null,
+						document: null,
+						document_date: '10/11/2020',
+						withholding_tax_group: null                       
+                    },
+                    {
+                        id: 2,
+                        date: '09/21/2020',
+                        company_account: 'chap',
+                        account: 'chap-000000',
+                        invoice: '10001',
+                        description: null,
+                        debit: 1500.00,
+                        credit: 0,
+                        offset_account_type: 'Bank',
+                        offset_account: '7000-001-201-101',
+
+                        selected: false,
+                        alreadyInSelectedItem: false,
+
+						voucher: 'chap-APP',
+						currency: 'USD',
+						account_name: 'Corbin Supply',
+						offset_account_name: 'Operating Bank Account',
+						method_of_payments: 'CHECK',
+						payment_specification: null,
+						payment_id: null,
+						settlement_type: 'Designated Transaction',
+						check_number: null,
+						document: null,
+						document_date: '10/11/2020',
+						withholding_tax_group: null                       
+                    },
+                ],
+
+                showOnlyData: {
+                	date: true,
+                	account_type: true,
+                	credit: true,
+                	debit: true,
+                	description: true,
+                	offset_account: true,
+                	offset_account_type: true
+                },
+
+                selected: {
+            		voucher: null,
+					currency: null,
+					account_name: null,
+					offset_account_name: null,
+					method_of_payments: null,
+					payment_specification: null,
+					payment_id: null,
+					settlement_type: null,
+					check_number: null,
+					document: null,
+					document_date: null,
+					withholding_tax_group: null  
+                },
+	      	}
+		},
+
+		components: {
+			'card': Card,
+            'data-table': DataTable,
+		    'selectize': Selectize,
+		    'datepicker': Datepicker,
+			'form-request': FormRequest,
+		},
+
+		watch: {
+			items(val) {
+				this.init();
+			}
+		},
+
+		mounted() {
+			this.init();
+		},
+
+		methods: {
+			init() {
+				//
+			},
+
+			getTotalCredit() {
+
+			},
+
+			onEnter(e, input) {
+				if(e.keyCode === 13) {
+					this.showOnlyData[input] = true; 
+				}
+			},
+
+			selectedLine(item) {
+				_.each(this.items, (item) => {
+					item.selected = false;	
+				})
+				item.selected = true;
+				this.selected = item;
+			},
+
+			dataSelected(item) {
+				item.alreadyInSelectedItem = !item.alreadyInSelectedItem;
+			},
+
+			datePickerClosed(item) {
+				item.date = moment(item.date).format('MM/DD/YYYY');
+				this.showOnlyData.date = true;
+			}
+
+		}
+	}
+</script>
+
+<style type="text/css">
+	tr {
+		cursor: hand;
+	}
+
+	.selected-table {
+		background: #C1C1C1;
+	}
+</style>

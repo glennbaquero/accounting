@@ -1,0 +1,230 @@
+<template>
+	<div>
+		<form-request :submit-url="submitUrl" @load="load" @success="fetch" confirm-dialog sync-on-success>
+			<div class="card">
+				<div class="card-header">
+					<ul class="nav nav-pills">
+						<li class="nav-item"><a class="nav-link active" href="#inventory" data-toggle="tab">Inventory On Hand</a></li>
+						<li class="nav-item"><a class="nav-link" href="#product" data-toggle="tab">Variant Details</a></li>
+						<li class="nav-item"><a class="nav-link" href="#variants" data-toggle="tab">Parent Product Details</a></li>
+					</ul>
+				</div>							
+				
+				<div class="card-body">
+					<div class="tab-content">
+						<div class="tab-pane show active" id="inventory">
+							<div class="card">
+								<div class="card-header">
+									<b>Inventory Overview</b>
+								</div>
+								<div class="card-body">
+									<div class="row mb-2">
+										<div class="form-group col-md-12">
+											<div class="custom-control custom-switch">
+												<input
+												v-model="item.is_available"
+												name="is_available" :checked="item.watch" type="checkbox" class="custom-control-input" id="is_available">
+												<label class="custom-control-label" for="is_available">Watched</label>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="form-group col-sm-3">
+											<label>Product</label>
+											<input readonly :value="product.name" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>Variant #</label>
+											<input readonly :value="item.variant_number" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>Variant</label>
+											<input readonly :value="item.name" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>Unit Price</label>
+											<input readonly :value="item.unit_price | currency" type="text" class="form-control">
+										</div>
+									</div>
+									<div class="row">
+										<div class="form-group col-sm-3">
+											<label>On Hand</label>
+											<input readonly :value="item.quantity" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>On Purchase Order <small>(total quantity)</small></label>
+											<input readonly :value="item.on_po" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>On Sales Order <small>(total quantity)</small></label>
+											<input readonly :value="item.on_so" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>Warning Value <small>(threshold to mark as warning status)</small></label>
+											<input name="threshold_warning" v-model="item.threshold_warning" type="text" class="form-control">
+										</div>
+									</div>
+									<div class="row">
+										<div class="form-group col-sm-3">
+											<label>On Hand Total Value</label>
+											<input readonly :value="item.on_hand_value | currency" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>Purchase Order Total Value <small>(total price)</small></label>
+											<input readonly :value="item.po_value | currency" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>Sales Order Total Value <small>(total price)</small></label>
+											<input readonly :value="item.so_value | currency" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>Danger Value <small>(threshold to mark as danger status)</small></label>
+											<input name="threshold_danger" v-model="item.threshold_danger" type="text" class="form-control">
+										</div>
+									</div>
+								</div>
+								<div class="card-footer text-right">
+									<action-button type="submit" :disabled="loading" class="btn-primary">Save Changes</action-button>
+								</div>
+							</div>
+						</div>
+						<div class="tab-pane show" id="product">
+							<div class="card">
+								<div class="card-header">
+									<b>Variant Overview</b>
+								</div>
+								<div class="card-body">
+									<div class="row mb-2">
+										<div class="form-group col-md-12">
+											<div class="custom-control custom-switch">
+												<input
+												readonly
+												v-model="item.is_available"
+												name="is_available" :checked="item.is_available" type="checkbox" class="custom-control-input" id="is_available">
+												<label class="custom-control-label" for="is_available">Available</label>
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div class="form-group col-sm-3">
+											<label>Variant #</label>
+											<input readonly v-model="item.variant_number" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>SKU <small>(optional)</small></label>
+											<input readonly v-model="item.sku" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>Batch Number <small>(optional)</small></label>
+											<input readonly v-model="item.batch_number" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-3">
+											<label>Serial Number <small>(optional)</small></label>
+											<input readonly v-model="item.serial_number" type="text" class="form-control">
+										</div>
+									</div>
+									<div class="row">
+										<div class="form-group col-sm-6">
+											<label>Name</label>
+											<input readonly v-model="item.name" type="text" class="form-control">
+										</div>
+
+										<div class="form-group col-sm-6">
+											<label>Unit of Measurement</label>
+											<input readonly v-model="item.unit_of_measurement" type="text" class="form-control">
+										</div>
+									</div>
+									<div class="row">
+										<div class="form-group col-sm-6">
+											<label>Size</label>
+											<input readonly v-model="item.size" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-6">
+											<label>Color</label>
+											<input readonly v-model="item.color" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-6">
+											<label>Unit Price</label>
+											<input readonly v-model="item.unit_price" type="number" class="form-control">
+										</div>
+									</div>
+								</div>
+								<div class="card-footer text-right">
+									<a class="btn btn-primary" :href="item.variantUrl" target="_blank"><i class="fas fa-external-link-alt"></i> Go to Variant</a>
+								</div>
+							</div>
+						</div>
+						<div class="tab-pane show" id="variants">
+							<div class="card">
+								<div class="card-header">
+									<b>Parent Product Overview</b>
+								</div>
+								<div class="card-body">
+									<div class="row">
+										<div class="form-group col-sm-4">
+											<label>Name</label>
+											<input readonly  v-model="product.name" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-4">
+											<label>Product #</label>
+											<input readonly  v-model="product.product_number" type="text" class="form-control">
+										</div>
+									</div>
+									<div class="row">
+										<div class="form-group col-sm-4">
+											<label>Batch Number</label>
+											<input readonly v-model="product.batch_number" type="text" class="form-control">
+										</div>
+										<div class="form-group col-sm-4">
+											<label>Serial Number</label>
+											<input readonly v-model="product.serial_number" type="text" class="form-control">
+										</div>
+									</div>
+								</div>
+								<div class="card-footer text-right">
+									<a class="btn btn-primary" :href="item.productUrl" target="_blank"><i class="fas fa-external-link-alt"></i> Go to Parent Product</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+		</form-request>
+	</div>
+</template>
+
+<script>
+	import CrudMixin from 'Mixins/crud.js';
+
+	import Card from 'Components/containers/Card.vue';
+	import TextEditor from 'Components/inputs/TextEditor.vue';
+	import FormRequest from 'Components/forms/FormRequest.vue';
+	import ActionButton from 'Components/buttons/ActionButton.vue';
+
+	export default {
+
+		components: {
+			Card,
+			'text-editor': TextEditor,
+			'form-request': FormRequest,
+			'action-button': ActionButton,
+		},
+
+		data() {
+			return {
+				item: {},
+				product: {},
+			}
+		},
+
+		methods: {
+			fetchSuccess(data) {
+				this.item = data.item ? data.item : this.item;
+				this.product = data.product ? data.product : this.product;
+			},
+		},
+
+		mixins: [ CrudMixin ],
+	}
+</script>

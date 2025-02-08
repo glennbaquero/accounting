@@ -1,0 +1,48 @@
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class AddColumnsToVpjlAndCpjl extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('vendor_payment_journals', function (Blueprint $table) {
+            if (!Schema::hasColumn('vendor_payment_journals', 'method_of_payment_vendor')) {
+                $table->string('method_of_payment_vendor')->nullable();
+            }
+        });
+
+        Schema::table('customer_payment_journals', function (Blueprint $table) {
+            if (!Schema::hasColumn('customer_payment_journals', 'method_of_payment_customer')) {
+                $table->string('method_of_payment_customer')->nullable();
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('vendor_payment_journals', function (Blueprint $table) {
+            if (Schema::hasColumn('vendor_payment_journals', 'method_of_payment_vendor')) {
+                $table->dropColumn('method_of_payment_vendor');
+            }
+        });
+
+        Schema::table('customer_payment_journals', function (Blueprint $table) {
+            if (Schema::hasColumn('customer_payment_journals', 'method_of_payment_customer')) {
+                $table->dropColumn('method_of_payment_customer');
+            }
+        });
+    }
+}

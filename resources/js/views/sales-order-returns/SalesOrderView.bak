@@ -1,0 +1,808 @@
+<template>
+	<div>
+		<form-request :submit-url="submitUrl" @load="load" @success="fetch" confirm-dialog sync-on-success>
+			<card>
+				<template v-slot:header>
+					Sales Order Information
+					<div class="float-right">
+						<action-button type="submit" :disabled="loading" class="btn-primary">Save Changes</action-button>
+						<button type="button" class="btn btn-success" @click="confirmedSO" :disabled="disableConfirmButton">Confirm SO</button>
+						<a :href="item.vendorInvoiceUrl" class="btn btn-success" :class="disableGenerateInvoiceButton ? 'disabled' : ''">Generate Invoice</a>
+					</div>
+				</template>
+				<div class="card">
+				    <div class="card-header p-2">
+				        <ul class="nav nav-pills">
+				            <!-- <li class="nav-item"><a class="nav-link " href="#general" data-toggle="tab">General</a></li> -->
+				            <li class="nav-item"><a class="nav-link active" href="#sales_order" data-toggle="tab">Sales Order</a></li>
+				            <!-- <li class="nav-item"><a class="nav-link" href="#customer" data-toggle="tab">Customer Information</a></li> -->
+				            <li class="nav-item"><a class="nav-link" href="#financial" data-toggle="tab">Financial dimensions</a></li>
+				            <li class="nav-item"><a class="nav-link" href="#delivery" data-toggle="tab">Delivery</a></li>
+				            <li class="nav-item"><a class="nav-link" href="#price_discount" data-toggle="tab">Totals</a></li>
+				            <li class="nav-item"><a class="nav-link" href="#sales_order_lines" data-toggle="tab">Sales order lines</a></li>
+				        </ul>
+				    </div>
+
+				    <div class="card-body">
+				        <div class="tab-content">
+				        	<div class="tab-pane " id="general">
+		        				<div class="row">
+		        		    		<div class="form-group col-sm-6">
+		        		    			<label>Customer Account</label>
+		        		                <select name="customer_account" v-model="item.customer_account" class="form-control">
+		        		                	<option v-for="customer in customers" :value="customer.customer_account">{{ customer.customer_account }}</option>
+		        		                </select>
+		        		    		</div>
+		        		    		<div class="form-group col-sm-6">
+		        		    			<label>Invoice Account</label>
+		        		                <select name="invoice_account" v-model="item.invoice_account" class="form-control">
+		        		                	<option v-for="customer in customers" :value="customer.customer_account">{{ customer.customer_account }}</option>
+		        		                </select>
+		        		    		</div>
+		        				</div>
+				        	</div>
+
+				        	<div class="tab-pane show active" id="sales_order">
+		        				<div class="row">
+		        					<div class="col-md-6">
+		        						<div class="form-group">
+		        							<label>Sales order</label><br>
+		        							<p>Sales order number</p>
+		        							<input type="text" name="sales_order_number" v-model="item.sales_order_number" class="form-control">
+		        						</div>
+		        						<div class="form-group">
+		        							<label>Customer Account</label><br>
+			        		    			<p>Customer Account</p>
+			        		                <select name="customer_account" v-model="item.customer_account" class="form-control">
+			        		                	<option v-for="customer in customers" :value="customer.customer_account">{{ customer.customer_account }}</option>
+			        		                </select>
+			        		    			<p>Invoice Account</p>
+			        		                <select name="invoice_account" v-model="item.invoice_account" class="form-control">
+			        		                	<option v-for="customer in customers" :value="customer.customer_account">{{ customer.customer_account }}</option>
+			        		                </select>
+			        		    		</div>	
+		        						<div class="form-group">
+			        		    			<p>Sales order date</p>
+			        		    			<input ref="sales_order_date" type="text" class="form-control" name="sales_order_date" v-model="item.sales_order_date" readonly>
+			        		    			<p>Delivery date</p>
+			        		    			<input ref="delivery_date_pickr" type="text" class="form-control" name="delivery_date" v-model="item.delivery_date" readonly>
+			        		    			<p>Due date</p>
+			        		    			<input ref="due_date" type="text" class="form-control" name="due_date" v-model="item.due_date" readonly>
+			        		    			<p>Confirmed date</p>
+			        		    			<input ref="confirmed_date" type="text" class="form-control" name="confirmed_date" v-model="item.confirmed_date" readonly>
+			        		    			<p>Accounting date</p>
+			        		    			<input ref="accounting_date" type="text" class="form-control" name="accounting_date" v-model="item.accounting_date" readonly>
+			        		    		</div>
+		        					</div>
+
+		        					<div class="col-md-6">
+		        						<div class="form-group">
+			        		    			<label>Customer Details</label><br>
+							    			<p>Customer Name</p>
+							                <input name="customer_name" v-model="item.customer_name" type="text" class="form-control">
+							    			<p>Customer Address</p>
+							                <textarea name="customer_address" v-model="item.customer_address" class="form-control">{{ item.customer_name }}</textarea>
+							    			<p>Customer Contact ID</p>
+							                <input name="customer_contact_id" v-model="item.customer_contact_id" type="text" class="form-control">
+							    			<p>Sold By</p>
+							    			<select name="sold_by" v-model="item.sold_by" class="form-control">
+							    				<option v-for="user in users" :value="user.id">{{ user.fullname }}</option>
+							    			</select>
+		        						</div>
+		        						<div class="form-group">
+			        		    			<label>Status</label><br>
+			        		    			<p>Sales order status</p>
+			        		                <select name="sales_order_status" v-model="item.sales_order_status" class="form-control">
+			        		                	<option value="Open Order" selected>Open Order</option>
+			        		                	<option value="Delivered">Delivered</option>
+			        		                	<option value="Invoiced">Invoiced</option>
+			        		                	<option value="Canceled">Canceled</option>
+			        		                </select>
+			        		    			<p>Document status</p>
+			        		                <select name="document_status" v-model="item.document_status" class="form-control">
+			        		                	<option value="None" selected>None</option>
+			        		                	<option value="Invoice">Invoice</option>
+			        		                	<option value="Product Receipt">Product Receipt</option>
+			        		                </select>
+			        		    			<p>Approval status</p>
+			        		                <select name="approval_status" v-model="item.approval_status" class="form-control">
+			        		                	<option value="Draft" selected>Draft</option>
+			        		                	<option value="Confirmed">Confirmed</option>
+			        		                	<option value="Finalized">Finalized</option>
+			        		                </select>
+			        		    		</div>
+			        		    		<div class="form-group">
+							    			<label>Payments</label>
+							    			<p>Payment methods</p>
+							                <select name="method_of_payment" v-model="item.method_of_payment" class="form-control">
+							    				<option v-for="method in payment_methods" :value="method.id">{{ method.name }}</option>
+							                </select>
+							    			<p>Terms of payment</p>
+							                <select name="terms_of_payment" v-model="item.terms_of_payment" class="form-control">
+							    				<option v-for="payment in terms_of_payments" :value="payment.terms_of_payment">{{ payment.terms_of_payment }}</option>
+							                </select>
+							    			<p>Payment specification</p>
+							                <textarea name="payment_specification" v-model="item.payment_specification" class="form-control">{{ item.payment_specification }}</textarea>
+							    			<p>Sales tax group</p>
+							                <input name="sales_tax_group" v-model="item.sales_tax_group" type="text" class="form-control">
+							    			<p>Tax exempt number</p>
+							                <input name="tax_exempt_number" v-model="item.tax_exempt_number" type="text" class="form-control">
+										</div>
+		        					</div>
+		        					
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Approval status date</label>
+		        		    			<input ref="approval_status_date" type="text" class="form-control" name="approval_status_date" v-model="item.approval_status_date" readonly>
+		        		    		</div> -->
+		        				</div>
+				        	</div>
+
+				        	<!-- <div class="tab-pane" id="customer"> -->
+								<!-- <div class="row"> -->
+						    		<!-- <div class="form-group col-sm-4">
+						    			<label>Customer Name</label>
+						                <input name="customer_name" v-model="item.customer_name" type="text" class="form-control">
+						    		</div>
+						    		<div class="form-group col-sm-4">
+						    			<label>Customer Address</label>
+						                <textarea name="customer_address" v-model="item.customer_address" class="form-control">{{ item.customer_name }}</textarea>
+						    		</div>
+						    		<div class="form-group col-sm-4">
+						    			<label>Customer Contact ID</label>
+						                <input name="customer_contact_id" v-model="item.customer_contact_id" type="text" class="form-control">
+						    		</div> -->
+						    		<!-- <div class="form-group col-sm-4">
+						    			<label>Confirmed By</label>
+						    			<select name="confirmed_by" v-model="item.confirmed_by" class="form-control">
+						    				<option v-for="user in users" :value="user.id">{{ user.fullname }}</option>
+						    			</select>
+						    		</div> -->
+						    		<!-- <div class="form-group col-sm-6">
+						    			<label>Ordered By</label>
+						    			<select name="sold_by" v-model="item.sold_by" class="form-control">
+						    				<option v-for="user in users" :value="user.id">{{ user.fullname }}</option>
+						    			</select>
+						    		</div> -->
+						    		<!-- <div class="form-group col-sm-6">
+						    			<label>Requested By</label>
+						    			<select name="requested_by" v-model="item.requested_by" class="form-control">
+						    				<option v-for="user in users" :value="user.id">{{ user.fullname }}</option>
+						    			</select>
+						    		</div> -->
+								<!-- </div> -->
+				        	<!-- </div> -->
+
+				        	<div class="tab-pane" id="financial">
+		        				<div class="row">
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Cost center</label>
+						    			<select name="cost_center" v-model="item.cost_center" class="form-control">
+						    				<option v-for="cost_center in cost_centers" :value="cost_center.financial_dimension_value_code">{{ cost_center.dimension_name }}</option>
+						    			</select>
+		        		    		</div>
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Department</label>
+						    			<select name="department" v-model="item.department" class="form-control">
+						    				<option v-for="department in departments" :value="department.financial_dimension_value_code">{{ department.dimension_name }}</option>
+						    			</select>
+		        		    		</div>
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Expense purpose</label>
+						    			<select name="expense_purpose" v-model="item.expense_purpose" class="form-control">
+						    				<option v-for="expense_purpose in expense_purposes" :value="expense_purpose.financial_dimension_value_code">{{ expense_purpose.dimension_name }}</option>
+						    			</select>
+		        		    		</div>
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Posting profile</label>
+		        		                <input name="posting_profile" v-model="item.posting_profile" type="text" class="form-control">
+		        		    		</div>
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Accouting distribution</label>
+		        		                <input name="accouting_distribution" v-model="item.accouting_distribution" type="text" class="form-control">
+		        		    		</div> -->
+		        				</div>
+				        	</div>	
+
+				        	<div class="tab-pane" id="delivery">
+		        				<div class="row">
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Sales type</label>
+		        		                <select name="sales_type" v-model="item.sales_type" class="form-control">
+		        		                	<option value="Standard SO" selected>Standard SO</option>
+		        		                	<option value="Contract SO">Contract SO</option>
+		        		                	<option value="Blanket SO">Blanket SO</option>
+		        		                	<option value="Planned SO">Planned SO</option>
+		        		                </select>
+		        		    		</div>
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Sales order status</label>
+		        		                <select name="sales_order_status" v-model="item.sales_order_status" class="form-control">
+		        		                	<option value="Open Order" selected>Open Order</option>
+		        		                	<option value="Delivered">Delivered</option>
+		        		                	<option value="Invoiced">Invoiced</option>
+		        		                	<option value="Canceled">Canceled</option>
+		        		                </select>
+		        		    		</div> -->
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Settlement type</label>
+		        		                <select name="settlement_type" v-model="item.settlement_type" class="form-control">
+		        		                	<option value="None" selected>None</option>
+		        		                	<option value="Open Transactions">Open Transactions</option>
+		        		                	<option value="Designated Transactions">Designated Transactions</option>
+		        		                </select>
+		        		    		</div>
+		        		    		<!-- <div class="form-group col-sm-6">
+		        		    			<label>Document status</label>
+		        		                <select name="document_status" v-model="item.document_status" class="form-control">
+		        		                	<option value="None" selected>None</option>
+		        		                	<option value="Invoice">Invoice</option>
+		        		                	<option value="Product Receipt">Product Receipt</option>
+		        		                </select>
+		        		    		</div>
+		        		    		<div class="form-group col-sm-6">
+		        		    			<label>Approval status</label>
+		        		                <select name="approval_status" v-model="item.approval_status" class="form-control">
+		        		                	<option value="Draft" selected>Draft</option>
+		        		                	<option value="Confirmed">Confirmed</option>
+		        		                	<option value="Finalized">Finalized</option>
+		        		                </select>
+		        		    		</div> -->
+		        				</div>
+
+		        				<hr>
+
+		        				<div class="row">
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Prices Include Sales Tax</label>
+		        		                <input name="prices_include_sales_tax" v-model="item.prices_include_sales_tax" type="text" class="form-control">
+		        		    		</div>
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Delivery Terms</label>
+		        		                <select name="delivery_terms" v-model="item.delivery_terms" class="form-control">
+		        		                	<option value="None" selected>None</option>
+		        		                </select>
+		        		    		</div>
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Mode of delivery</label>
+		        		                <select name="mode_of_delivery" v-model="item.mode_of_delivery" class="form-control">
+		        		                	<option value="Air" selected>Air</option>
+		        		                	<option value="Sea">Sea</option>
+		        		                	<option value="Land">Land</option>
+		        		                </select>
+		        		    		</div>
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Line discount group</label>
+		        		                <input name="line_discount_group" v-model="item.line_discount_group" type="text" class="form-control">
+		        		    		</div>
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Multiline Disc Group</label>
+		        		                <input name="multiline_disc_group" v-model="item.multiline_disc_group" type="text" class="form-control">
+		        		    		</div>
+		        		    		<div class="form-group col-sm-4">
+		        		    			<label>Total Discount Group</label>
+		        		                <input name="total_discount_group" v-model="item.total_discount_group" type="text" class="form-control">
+		        		    		</div> -->
+		        		    		
+		        				</div>
+				        	</div>
+
+				        	<div class="tab-pane" id="price_discount">
+		        				<div class="row">
+		        					<div class="col-md-6">
+		        						<div class="form-group">
+		        							<label>Data</label>
+		        							<p>Total Quantity</p>
+		        							<input name="total_data_quantity" :value="totalQuantity" type="text"  readonly class="form-control">
+		        						</div>
+		        						<div class="form-group">
+			        		                <label>Totals</label><br>
+											<!-- <p>Total Line Discount</p>
+								            <input name="total_line_discount" v-model="item.total_line_discount" type="number" class="form-control"> -->
+					            			<p>Subtotal Amount</p>
+					                        <input name="subtotal_amount" :value="subTotalAmount" type="text"  readonly class="form-control">
+					                        <p>Total Discount</p>
+			        		                <input name="total_discount" :value="totalDiscount" type="text"  readonly class="form-control">
+			        		                <p>Total Charges</p>
+			        		                <input name="total_charges" :value="totalCharges" type="text"  readonly class="form-control">
+			        		                <p>Total Sales Tax</p>
+			        		                <input name="total_sales_tax" :value="totalSalesTax" type="text"  readonly class="form-control">
+			        		                <p>Total Round Off</p>
+			        		                <input name="total_round_off" :value="totalRoundOff" type="text"  readonly class="form-control">
+			        		                <p>Total Amount</p>
+			        		                <input name="total_amount" :value="totalAmount" type="text"  readonly class="form-control">
+			        		                <p>Cash discount</p>
+			        		                <input name="cash_discount" :value="totalCashDiscount" type="text"  readonly class="form-control">
+		        						</div>
+			        		    		<!-- <div class="form-group">
+			        		    			<p>Charges group</p>
+			        		                <input name="charges_group" v-model="item.charges_group" type="text" class="form-control">
+			        		                <p>Total Discount Percentage</p>
+			        		                <input name="total_discount_percentage" v-model="item.total_discount_percentage" type="number" class="form-control">
+			        		                <p>Total Cash Discount</p>
+			        		                <input name="total_cash_discount" v-model="item.total_cash_discount" type="number" class="form-control">
+			        		    		</div> -->
+
+		        					</div>
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Cash discount</label>
+		        		                <input name="cash_discount" v-model="item.cash_discount" type="number" class="form-control">
+		        		    		</div> -->
+									<!-- <div class="form-group col-sm-4">
+		        		    			<label>Total Discount Percentage</label>
+		        		                <input name="total_discount_percentage" v-model="item.total_discount_percentage" type="number" class="form-control">
+		        		    		</div> -->
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Total Quantity</label>
+		        		                <input name="total_data_quantity" v-model="item.total_data_quantity" type="number" class="form-control">
+		        		    		</div> -->
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Total Line Discount</label>
+		        		                <input name="total_line_discount" v-model="item.total_line_discount" type="number" class="form-control">
+		        		    		</div> -->
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Subtotal Amount</label>
+		        		                <input name="subtotal_amount" v-model="item.subtotal_amount" type="number" class="form-control">
+		        		    		</div> -->
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Total Discount</label>
+		        		                <input name="total_discount" v-model="item.total_discount" type="number" class="form-control">
+		        		    		</div> -->
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Total Charges</label>
+		        		                <input name="total_charges" v-model="item.total_charges" type="number" class="form-control">
+		        		    		</div> -->
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Total Sales Tax</label>
+		        		                <input name="total_sales_tax" v-model="item.total_sales_tax" type="number" class="form-control">
+		        		    		</div> -->
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Total Round Off</label>
+		        		                <input name="total_round_off" v-model="item.total_round_off" type="number" class="form-control">
+		        		    		</div> -->
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Total Amount</label>
+		        		                <input name="total_amount" v-model="item.total_amount" type="number" class="form-control">
+		        		    		</div> -->
+		        		    		<!-- <div class="form-group col-sm-4">
+		        		    			<label>Total Cash Discount</label>
+		        		                <input name="total_cash_discount" v-model="item.total_cash_discount" type="number" class="form-control">
+		        		    		</div> -->
+		        				</div>
+				        	</div>
+
+				        	<div class="tab-pane" id="sales_order_lines">
+			        		    <div class="row">
+			        		        <div class="col-md-6">
+			        		            <div class="col-md-12">
+			        		                <button type="button" class="btn btn-outline-secondary btn-sm w-10" data-toggle="modal" data-target="#add-line-modal">Add line</button>
+			        		            </div>
+			        		        </div>
+			        		    </div>
+			        		    <div class="row">
+			        		        <div class="col-md-12">
+			        					<data-table :is-default="false" :headers="headers" :items="sales_order_line">
+			        		                 <template v-slot:body="{ items }">
+			        		                    <tr v-for="(item, key) in items">
+			        		                        <td>{{ key + 1 }}</td>
+			        		                        <td>{{ item.item_number }}</td>
+			        		                        <td>{{ item.product_name }}</td>
+			        		                        <td>{{ item.sales_category }}</td>
+			        		                        <td>{{ item.size }}</td>
+			        		                        <td>{{ item.color }}</td>
+			        		                        <td>{{ item.quantity }}</td>
+			        		                        <td>{{ item.sales_unit }}</td>
+			        		                        <td>{{ item.discount }}</td>
+			        		                        <td>{{ item.discount_percentage }}</td>
+			        		                        <td>{{ item.line_net_amount }}</td>
+			        		                        <td>
+			        		                        	<action-button
+			        		                        	v-if="item.existing_data"
+			        		                        	small 
+			        		                        	color="btn-danger"
+			        		                        	alt-color="btn-warning"
+			        		                        	:show-alt="item.deleted_at"
+			        		                        	:action-url="item.removeUrl"
+			        		                        	icon="fas fa-trash"
+			        		                        	alt-icon="fas fa-trash-restore-alt"
+			        		                        	confirm-dialog
+			        		                        	:disabled="loading"
+			        		                        	title="Archive Item"
+			        		                        	alt-title="Restore Item"
+			        		                        	:message="'Are you sure you want to archive sales order line ' + item.sales_order_line_number + '?'"
+			        		                        	:alt-message="'Are you sure you want to restore sales order line ' + item.sales_order_line_number + '?'"
+			        		                        	@load="load"
+			        		                        	@success="fetch"
+			        		                        	></action-button>
+			        		                        	<template v-else>
+			        		                        		<button type="button" class="btn btn-flat btn-sm" @click="removeLine(key)">
+			        		                        		    <i class="fas fa-trash"></i>
+			        		                        		</button>
+			        		                        	</template>
+			        		                        </td>
+			        		                    </tr>
+			        		                 </template>         
+			        		            </data-table>
+			        		        </div>
+
+			        		        <textarea name="sales_order_line" v-show="false">{{ sales_order_lines }}</textarea>
+			        		    </div>
+				        	</div>
+				        </div>
+				    </div>
+
+				</div>
+
+				<div class="modal fade" id="add-line-modal">
+				   	<div class="modal-dialog">
+				        <div class="modal-content">
+				         	<div class="modal-body">
+				              	<div class="row">
+				              		<div class="form-group col-sm-6">
+				              			<label>Procurement Category</label>
+				              		</div>
+		              				<div class="form-group col-sm-6">
+		              		            <select name="sales_category" ref="sales_category" v-model="item.sales_category" class="form-control">
+		              		            	<option value="Air" selected>Air</option>
+		              		            	<option value="Sea">Sea</option>
+		              		            	<option value="Land">Land</option>
+		              		            </select>
+		              				</div>
+				              		<div class="form-group col-sm-6">
+		              					<label>Line Status</label>
+				              		</div>
+		              				<div class="form-group col-sm-6">
+		              		            <select name="line_status" ref="line_status" v-model="item.line_status" class="form-control">
+		              		            	<option value="Open Order" selected>Open Order</option>
+		              		            	<option value="Received">Received</option>
+		              		            	<option value="Invoiced">Invoiced</option>
+		              		            	<option value="Canceled">Canceled</option>
+		              		            </select>
+		              				</div>
+				              		<div class="form-group col-sm-6">
+		              					<label>Product</label>
+				              		</div>
+		              				<div class="form-group col-sm-6">
+		              		            <select name="item_number" ref="item_number" v-model="item.item_number" class="form-control">
+		              		            	<option v-for="product in products" :value="product">{{ product.name }}</option>
+		              		            </select>
+		              				</div>
+				              		<div class="form-group col-sm-6">
+		              					<label>Size</label>
+				              		</div>
+		              				<div class="form-group col-sm-6">
+		              		            <select name="size" ref="size" v-model="item.size" class="form-control">
+		              		            	<option v-for="product in products" :value="product.size">{{ product.size }}</option>
+		              		            </select>
+		              				</div>
+				              		<div class="form-group col-sm-6">
+		              					<label>Color</label>
+				              		</div>
+		              				<div class="form-group col-sm-6">
+		              		            <select name="color" ref="color" v-model="item.color" class="form-control">
+		              		            	<option v-for="product in products" :value="product.color">{{ product.color }}</option>
+		              		            </select>
+		              				</div>
+				              		<div class="form-group col-sm-6">
+		              					<label>Quantity</label>
+				              		</div>
+		        		    		<div class="form-group col-sm-6">
+		        		                <input name="quantity" ref="quantity" v-model="item.quantity" type="number" class="form-control">
+		        		    		</div>
+		        		    		<div class="form-group col-sm-6">
+		              					<label>Line discount</label>
+				              		</div>
+		        		    		<div class="form-group col-sm-6">
+		        		                <input name="cash_discount" ref="cash_discount" v-model="item.cash_discount" type="number" class="form-control">
+		        		    		</div>
+				              		<div class="form-group col-sm-6">
+		              					<label>Discount Percentage</label>
+				              		</div>
+		        		    		<div class="form-group col-sm-6">
+		        		                <input name="discount_percentage" ref="discount_percentage" v-model="item.discount_percentage" type="number" class="form-control">
+		        		    		</div>
+
+				              		<div class="form-group col-sm-6">
+		              					<label>Delivery Date</label>
+				              		</div>
+		        		    		<div class="form-group col-sm-6">
+		        		    			<input ref="delivery_date_tbl" type="text" class="form-control" name="delivery_date" v-model="item.delivery_date" readonly>
+		        		    		</div>
+				              	</div>
+				            </div>
+				            <div class="modal-footer text-right">
+				              	<button type="button" class="btn btn-primary" @click="addLine">Add line</button>
+				            </div>
+				        </div>
+				    </div>
+
+				</div>
+
+				<!-- <template v-slot:footer>
+				</template> -->
+			</card>
+			
+		</form-request>
+	</div>
+</template>
+
+<script>
+	import CrudMixin from 'Mixins/crud.js';
+
+	import Card from 'Components/containers/Card.vue';
+	import TextEditor from 'Components/inputs/TextEditor.vue';
+	import FormRequest from 'Components/forms/FormRequest.vue';
+	import Datepicker from 'vuejs-datepicker';
+    import DataTable from 'Components/tables/StaticDataTable.vue';
+	import ActionButton from 'Components/buttons/ActionButton.vue';
+
+	import flatpickr from 'flatpickr';
+	import 'flatpickr/dist/flatpickr.css';
+
+	export default {
+		props: {
+			showConfirmButton: {
+				default: true,
+				type: Boolean
+			},
+
+			orderNumber: {
+				default: null,
+				type: String
+			}
+		},
+
+		components: {
+			Card,
+			'text-editor': TextEditor,
+			'form-request': FormRequest,
+		    'datepicker': Datepicker,
+            'data-table': DataTable,
+			'action-button': ActionButton,
+		},
+
+		data() {
+			return {
+				item: {
+					sales_order_number: null,
+					sales_order_status: 'Open Order',
+					document_status: 'None',
+					approval_status: 'Draft',
+					sales_type: 'Standard PO',
+					settlement_type: 'None',
+					is_already_confirmed: false,
+					hasExistingInvoice: false
+				},
+				users: [],
+				customers: [],
+				products: [],
+				payment_methods: [],
+				terms_of_payments: [],
+				cost_centers: [],
+				departments: [],
+				expense_purposes: [],
+
+				sales_order_line: [],
+				sales_order_lines: [],
+			}
+		},
+
+
+        computed: {
+            headers() {
+                let array = [
+                    { text: 'Line #', value: null },
+                    { text: 'Item #', value: null },
+                    { text: 'Product name', value: null },
+                    { text: 'Sales category', value: null },
+                    { text: 'Size', value: null },
+                    { text: 'Color', value: null },
+                    { text: 'Total quantity', value: null },
+                    { text: 'Unit sales', value: null },
+                    { text: 'Cash discount', value: null },
+                    { text: 'Discount percentage', value: null },
+                    { text: 'Line amount', value: null },
+                    { text: 'Action', value: null },
+                ];
+
+                return array;
+
+            },
+
+
+            totalQuantity() {
+            	var sales_order_line = this.sales_order_line;
+
+            	var total = 0;
+
+            	_.each(sales_order_line, (line) => {
+            		total += parseInt(line.quantity);
+            	})
+            	this.item.total_data_quantity = total;
+            	return total;
+            },
+
+            subTotalAmount() {
+            	var sales_order_line = this.sales_order_line;
+
+            	var total = 0;
+
+            	_.each(sales_order_line, (line) => {
+            		total += parseInt(line.line_net_amount);
+            	})
+            	return total;
+            },
+
+            totalDiscount() {
+            	var sales_order_line = this.sales_order_line;
+
+            	var total = 0;
+
+            	_.each(sales_order_line, (line) => {
+            		total += parseInt(line.discount);
+            	})
+            	return total;
+            },
+
+            totalCharges() {
+            	var sales_order_line = this.sales_order_line;
+
+            	var total = 0;
+
+            	_.each(sales_order_line, (line) => {
+            		total += 100;
+            	})
+            	return total;
+            },
+
+            totalSalesTax() {
+            	var total = 0;
+
+            	total = this.subTotalAmount * 0.2;
+
+            	return total;
+
+            },
+
+            totalRoundOff() {
+            	var total = 0;
+
+            	total = this.subTotalAmount - (this.totalDiscount + this.totalCharges + this.totalSalesTax);
+            	total = Math.round(total);
+            	return total;
+            },
+
+            totalAmount() {
+            	var total = 0;
+
+            	total = this.subTotalAmount - (this.totalDiscount + this.totalCharges + this.totalSalesTax);
+
+            	return total;
+            },
+
+            totalCashDiscount() {
+            	return 0;
+            },
+
+            disableConfirmButton() {
+            	if(this.showConfirmButton) {
+	            	return this.item.is_already_confirmed;
+            	}
+
+            	return true;
+            },
+
+            disableGenerateInvoiceButton() {
+            	if(this.showConfirmButton) {
+	            	return this.item.hasExistingInvoice;
+            	}
+
+            	return true;
+            },
+        },
+
+		mixins: [ CrudMixin ],
+
+
+		watch: {
+			'item.customer_account'(val) {
+				_.each(this.customers, (customer) => {
+					if(customer.customer_account == val) {
+						this.item.customer_name = customer.fullname;
+						this.item.customer_address = customer.company;
+						this.item.customer_contact_id = customer.phone;
+						this.item.tax_exempt_number = customer.tax_exempt_number;
+						this.item.method_of_payment = customer.method_of_payment;
+						this.item.terms_of_payment = customer.terms_of_payment;
+						this.item.payment_specification = customer.payment_specification;
+					}
+				})
+			}
+		},
+		mounted() {
+
+			if(this.orderNumber) {
+				this.item.sales_order_number = this.orderNumber
+			}
+
+			flatpickr(this.$refs.sales_order_date)
+			flatpickr(this.$refs.delivery_date_pickr)
+			flatpickr(this.$refs.due_date)
+			flatpickr(this.$refs.confirmed_date)
+			flatpickr(this.$refs.accounting_date)
+			flatpickr(this.$refs.delivery_date_tbl)
+			flatpickr(this.$refs.approval_status_date)
+		},
+
+		methods: {
+			fetchSuccess(data) {
+				this.item = data.item ? data.item : this.item;
+				this.users = data.users ? data.users : this.users;
+				this.customers = data.customers ? data.customers : this.customers;
+				this.products = data.products ? data.products : this.products;
+				this.terms_of_payments = data.terms_of_payments ? data.terms_of_payments : this.terms_of_payments;
+				this.payment_methods = data.payment_methods ? data.payment_methods : this.payment_methods;
+				this.cost_centers = data.cost_centers ? data.cost_centers : this.cost_centers;
+				this.sales_order_line = data.sales_order_lines ? data.sales_order_lines : this.sales_order_line;
+				
+				this.departments = data.departments ? data.departments : this.departments;
+				this.expense_purposes = data.expense_purposes ? data.expense_purposes : this.expense_purposes;
+			},
+
+			addLine() {
+				var data = {
+					sales_category: this.$refs.sales_category.value,
+					line_number: this.sales_order_line.length + 1,
+					item_number: this.item.item_number.item_number,
+					product_name: this.item.item_number.name,
+					size: this.$refs.size.value,
+					color: this.$refs.color.value,
+					quantity: this.item.quantity,
+					sales_unit: this.item.item_number.unit_price * this.$refs.quantity.value,
+					line_status: this.$refs.line_status.value,
+					line_net_amount: this.item.item_number.unit_price * this.$refs.quantity.value,
+					delivery_date: this.$refs.delivery_date_tbl.value,
+
+					// computation in totals
+					
+					discount: this.item.cash_discount,
+					discount_percentage: this.item.discount_percentage,
+
+					// for backend purpose
+					product_obj: this.item.item_number,
+					is_new: true
+				}
+
+				this.sales_order_line.push(data);	
+				this.sales_order_lines = JSON.stringify(this.sales_order_line);
+			},
+
+			removeLine(key) {
+				this.sales_order_line.splice(key, 1);
+				this.sales_order_lines = JSON.stringify(this.sales_order_line);
+			},
+
+			confirmedSO() {
+				var $this = this;
+
+				swal.fire({
+				  title: 'Are you sure?',
+				  text: 'Are you sure you want to approved this SO?',
+				  icon: 'warning',
+				  showCancelButton: true,
+				  confirmButtonText: 'Confirm',
+				  cancelButtonText: 'Cancel'
+				}).then((result) => {
+				  if (result.value) {
+				    axios.post($this.item.confirmationUrl)
+			    	.then(response => {
+					    $this.$notification.show(response.data.message, 'Success')
+					    $this.fetch();
+			    	}).catch(error => {
+
+			    	})
+				  }
+				})
+			},
+		}
+	}
+</script>
