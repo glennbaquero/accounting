@@ -1,4 +1,4 @@
-# ObrixSolutions Inc.
+# Accounting System
 
 A Laravel + VueJs project ([Laravel mix](https://laravel.com/docs/8.x/mix))
 
@@ -69,4 +69,4 @@ On the second terminal:
 
 ### Footnote
 
-Have fun Softbir team!
+Have fun team!
