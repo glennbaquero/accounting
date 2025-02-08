@@ -51,7 +51,7 @@ This guide favors Ubuntu 20.4. For Windows user you can configure and enable [WS
 Open two terminals, on the first terminal do:
 
 ```
-~$ git clone https://<username>@bitbucket.org/softbir/php.git accounting_webapp
+~$ git clone https://git@github.com:glennbaquero/accounting.git
 ~$ cd accounting_webapp
 ~/accounting_webapp$ scp ~/home/.env .
 ~/accounting_webapp$ composer install
