@@ -119,7 +119,7 @@ class SalesDeliveryReceiptFetchController extends Controller
                 'terms_of_payment' => $item->terms_of_payment,
                 'bank_account' => $item->bank_account,
                 'total_amount' => number_format($item->total_amount, 2, '.', ','),
-                'department' => $item->department ? (FinancialDimensionValue::where('financial_dimension_value_code', $item->department)->first() ? FinancialDimensionValue::where('financial_dimension_value_code', $item->department)->first()->dimension_name : '---') : '---',
+                'department' => $item->department ? (FinancialDimensionValue::where('financial_dimension_value_code', $item->department)->first() ? FinancialDimensionValue::where('financial_dimension_value_code', $item->department)->first()?->dimension_name : '---') : '---',
                 'created_at' => $item->renderDate(),
                 'deleted_at' => $item->deleted_at,
             ]);

@@ -44,7 +44,7 @@ class VendorController extends Controller
      */
     public function store(VendorStoreRequest $request)
     {
-        $request['vendor_account'] = 'vendor-' . date('Ymd') . '-' . str_pad(Vendor::latest()->first()->id ?? 1, 4, '0', STR_PAD_LEFT);
+        $request['vendor_account'] = 'vendor-' . date('Ymd') . '-' . str_pad(Vendor::latest()->first()?->id ?? 1, 4, '0', STR_PAD_LEFT);
 
         $item = Vendor::store($request);
 

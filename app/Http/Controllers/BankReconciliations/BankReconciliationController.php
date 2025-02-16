@@ -500,7 +500,7 @@ class BankReconciliationController extends Controller
             'statement_ending_balance' => $statement_ending_balance,
             'statement_open_amount' => 0,
 
-            'cash_register_id' => $cashes->first() ? $cashes->first()->cashflow_transaction_id : null,
+            'cash_register_id' => $cashes->first() ? $cashes->first()?->cashflow_transaction_id : null,
             'cash_register_as_of_date' => now(),
 
             'created_by' => $request->user()->id,
@@ -595,14 +595,14 @@ class BankReconciliationController extends Controller
                 'cash_register_adjustment_id' => $item->cash_register_adjustment_id,
                 'statement_adjustment_id' => $item->statement_adjustment_id,
                 'bank_posting' => $item->bank_posting_id,
-                'customer_payment_id' => CustomerPayment::first()->id,
-                'customer_payment_issued_date' => CustomerPayment::first()->issue_date,
-                'customer_name' => CustomerPayment::first()->customer->fullname,
-                'customer_payment_method' => CustomerPayment::first()->method_of_payment->name,
-                'check_id' => Check::first()->check_id,
-                'check_number' => Check::first()->check_number,
-                'check_amount' => Check::first()->check_amount,
-                'bank_account_transaction_id' => BankAccountTransaction::first()->id,
+                'customer_payment_id' => CustomerPayment::first()?->id,
+                'customer_payment_issued_date' => CustomerPayment::first()?->issue_date,
+                'customer_name' => CustomerPayment::first()?->customer->fullname,
+                'customer_payment_method' => CustomerPayment::first()?->method_of_payment->name,
+                'check_id' => Check::first()?->check_id,
+                'check_number' => Check::first()?->check_number,
+                'check_amount' => Check::first()?->check_amount,
+                'bank_account_transaction_id' => BankAccountTransaction::first()?->id,
             ]);
         }
 

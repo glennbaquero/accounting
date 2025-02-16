@@ -195,9 +195,9 @@ class CustomerInvoiceJournalFetchController extends Controller
         $payment_methods = PaymentMethod::get();
         $terms_of_payments = TermsOfPayment::get();
         $voucher_lines = [];
-        $cost_centers = FinancialDimension::where('use_value_from', 'Cost centers')->first()->financial_dimension_values;
-        $departments = FinancialDimension::where('use_value_from', 'Departments')->first()->financial_dimension_values;
-        $expense_purposes = FinancialDimension::where('use_value_from', 'Expense purposes')->first()->financial_dimension_values;
+        $cost_centers = FinancialDimension::where('use_value_from', 'Cost centers')->first()?->financial_dimension_values;
+        $departments = FinancialDimension::where('use_value_from', 'Departments')->first()?->financial_dimension_values;
+        $expense_purposes = FinancialDimension::where('use_value_from', 'Expense purposes')->first()?->financial_dimension_values;
         $customers = Customer::get();
         $main_accounts = MainAccount::get();
         $clients = User::getClients();

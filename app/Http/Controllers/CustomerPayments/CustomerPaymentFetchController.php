@@ -25,8 +25,9 @@ use App\Models\BankAccountStatements\BankAccountStatement;
 use App\Models\BankPostings\BankPosting;
 use App\Models\AdminSetups\BankReason;
 use App\Models\BankReconciliations\BankReconciliation;
+use App\Models\BillsExchanges\BillsExchange;
 
-
+use Carbon\Carbon;
 
 class CustomerPaymentFetchController extends Controller
 {
@@ -203,12 +204,12 @@ class CustomerPaymentFetchController extends Controller
 
             $item['created_by_name'] = $item->created_by_user->renderName();
 
-            $item->letter_credit = $item->customer_invoice->sales_order->credits->first()->amendment_number;
-            $item->letter_credit_issue_date = Carbon::parse($item->customer_invoice->sales_order->credits->first()->issue_date)->format('m-d-Y');
-            $item->boe = BillsExchange::where('company_id', auth()->user()->company_id)->first()->bills_of_exchange;
-            $item->boe_issue_date = Carbon::parse(BillsExchange::where('company_id', auth()->user()->company_id)->first()->issue_date)->format('m-d-Y');
-            $item->guarantee = $item->customer_invoice->sales_order->guarantees->first()->letter_of_guarantee_number;
-            $item->guarantee_date = Carbon::parse($item->customer_invoice->sales_order->guarantees->first()->issue_date)->format('m-d-Y');
+            $item->letter_credit = $item->customer_invoice->sales_order->credits->first()?->amendment_number;
+            $item->letter_credit_issue_date = Carbon::parse($item->customer_invoice->sales_order->credits->first()?->issue_date)->format('m-d-Y');
+            $item->boe = BillsExchange::where('company_id', auth()->user()->company_id)->first()?->bills_of_exchange;
+            $item->boe_issue_date = Carbon::parse(BillsExchange::where('company_id', auth()->user()->company_id)->first()?->issue_date)->format('m-d-Y');
+            $item->guarantee = $item->customer_invoice->sales_order->guarantees->first()?->letter_of_guarantee_number;
+            $item->guarantee_date = Carbon::parse($item->customer_invoice->sales_order->guarantees->first()?->issue_date)->format('m-d-Y');
         
             if ($item->updated_by) {
                 $item['updated_by_name'] = $item->updated_by_user->renderName();

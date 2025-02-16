@@ -117,7 +117,7 @@ class CustomerInvoiceFetchController extends Controller
                 'terms_of_payment' => $item->terms_of_payment,
                 'bank_account' => $item->bank_account,
                 'total_amount' => number_format($item->total_amount, 2, '.', ','),
-                'department' => $item->department ? (FinancialDimensionValue::where('financial_dimension_value_code', $item->department)->first() ? FinancialDimensionValue::where('financial_dimension_value_code', $item->department)->first()->dimension_name : '---') : '---',
+                'department' => $item->department ? (FinancialDimensionValue::where('financial_dimension_value_code', $item->department)->first() ? FinancialDimensionValue::where('financial_dimension_value_code', $item->department)->first()?->dimension_name : '---') : '---',
                 'created_at' => $item->renderDate(),
                 'deleted_at' => $item->deleted_at,
             ]);
@@ -176,12 +176,12 @@ class CustomerInvoiceFetchController extends Controller
             $item['created_date'] = Carbon::parse($item->created_at)->format('m/d/Y h:i:s A');
             $item['updated_date'] = Carbon::parse($item->updated_at)->format('m/d/Y h:i:s A');
 
-            $item->letter_credit = $item->sales_order->credits->first()->amendment_number;
-            $item->letter_credit_issue_date = Carbon::parse($item->sales_order->credits->first()->issue_date)->format('m-d-Y');
-            $item->boe = BillsExchange::where('company_id', auth()->user()->company_id)->first()->bills_of_exchange;
-            $item->boe_issue_date = Carbon::parse(BillsExchange::where('company_id', auth()->user()->company_id)->first()->issue_date)->format('m-d-Y');
-            $item->guarantee = $item->sales_order->guarantees->first()->letter_of_guarantee_number;
-            $item->guarantee_date = Carbon::parse($item->sales_order->guarantees->first()->issue_date)->format('m-d-Y');
+            $item->letter_credit = $item->sales_order->credits->first()?->amendment_number;
+            $item->letter_credit_issue_date = Carbon::parse($item->sales_order->credits->first()?->issue_date)->format('m-d-Y');
+            $item->boe = BillsExchange::where('company_id', auth()->user()->company_id)->first()?->bills_of_exchange;
+            $item->boe_issue_date = Carbon::parse(BillsExchange::where('company_id', auth()->user()->company_id)->first()?->issue_date)->format('m-d-Y');
+            $item->guarantee = $item->sales_order->guarantees->first()?->letter_of_guarantee_number;
+            $item->guarantee_date = Carbon::parse($item->sales_order->guarantees->first()?->issue_date)->format('m-d-Y');
             
             $sales_order = $item->sales_order;
             $order_lines = [];
