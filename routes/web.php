@@ -879,20 +879,20 @@ Route::middleware(['auth:web'])->group(function() {
         //////////////////////////////
         Route::namespace('PuchaseDeliveryReceipts')->group(function() {
 
-            Route::get('purchase-delivery-receipts', 'PuchaseDeliveryReceiptController@index')->name('purchase-delivery-receipts.index');
-            Route::get('purchase-delivery-receipts/create/{id?}', 'PuchaseDeliveryReceiptController@create')->name('purchase-delivery-receipts.create');
-            Route::post('purchase-delivery-receipts/store/{id?}', 'PuchaseDeliveryReceiptController@store')->name('purchase-delivery-receipts.store');
-            Route::get('purchase-delivery-receipts/show/{id}', 'PuchaseDeliveryReceiptController@show')->name('purchase-delivery-receipts.show');
-            Route::post('purchase-delivery-receipts/update/{id}', 'PuchaseDeliveryReceiptController@update')->name('purchase-delivery-receipts.update');
-            Route::post('purchase-delivery-receipts/{id}/archive', 'PuchaseDeliveryReceiptController@archive')->name('purchase-delivery-receipts.archive');
-            Route::post('purchase-delivery-receipts/{id}/restore', 'PuchaseDeliveryReceiptController@restore')->name('purchase-delivery-receipts.restore');
-            Route::get('purchase-delivery-receipts/print/{id}', 'PuchaseDeliveryReceiptController@printPDF')->name('purchase-delivery-receipts.print');
-            Route::post('purchase-delivery-receipts/{id}/cancel', 'PuchaseDeliveryReceiptController@cancel')->name('purchase-delivery-receipts.cancel');
+            Route::get('purchase-delivery-receipts', 'PurchaseDeliveryReceiptController@index')->name('purchase-delivery-receipts.index');
+            Route::get('purchase-delivery-receipts/create/{id?}', 'PurchaseDeliveryReceiptController@create')->name('purchase-delivery-receipts.create');
+            Route::post('purchase-delivery-receipts/store/{id?}', 'PurchaseDeliveryReceiptController@store')->name('purchase-delivery-receipts.store');
+            Route::get('purchase-delivery-receipts/show/{id}', 'PurchaseDeliveryReceiptController@show')->name('purchase-delivery-receipts.show');
+            Route::post('purchase-delivery-receipts/update/{id}', 'PurchaseDeliveryReceiptController@update')->name('purchase-delivery-receipts.update');
+            Route::post('purchase-delivery-receipts/{id}/archive', 'PurchaseDeliveryReceiptController@archive')->name('purchase-delivery-receipts.archive');
+            Route::post('purchase-delivery-receipts/{id}/restore', 'PurchaseDeliveryReceiptController@restore')->name('purchase-delivery-receipts.restore');
+            Route::get('purchase-delivery-receipts/print/{id}', 'PurchaseDeliveryReceiptController@printPDF')->name('purchase-delivery-receipts.print');
+            Route::post('purchase-delivery-receipts/{id}/cancel', 'PurchaseDeliveryReceiptController@cancel')->name('purchase-delivery-receipts.cancel');
 
-            Route::post('purchase-delivery-receipts/approved/{id}', 'PuchaseDeliveryReceiptController@approved')->name('purchase-delivery-receipts.approved');
-            Route::post('purchase-delivery-receipts/posted/{id}', 'PuchaseDeliveryReceiptController@posted')->name('purchase-delivery-receipts.posted');
+            Route::post('purchase-delivery-receipts/approved/{id}', 'PurchaseDeliveryReceiptController@approved')->name('purchase-delivery-receipts.approved');
+            Route::post('purchase-delivery-receipts/posted/{id}', 'PurchaseDeliveryReceiptController@posted')->name('purchase-delivery-receipts.posted');
 
-            Route::post('purchase-delivery-receipts/to-invoice/{id}', 'PuchaseDeliveryReceiptController@toInvoice')->name('purchase-delivery-receipts.to-invoice');
+            Route::post('purchase-delivery-receipts/to-invoice/{id}', 'PurchaseDeliveryReceiptController@toInvoice')->name('purchase-delivery-receipts.to-invoice');
 
             Route::post('purchase-delivery-receipts/fetch', 'PuchaseDeliveryReceiptFetchController@fetch')->name('purchase-delivery-receipts.fetch');
             Route::post('purchase-delivery-receipts/fetch?archived=1', 'PuchaseDeliveryReceiptFetchController@fetch')->name('purchase-delivery-receipts.fetch-archive');
