@@ -30,9 +30,9 @@ class VendorPaymentJournalController extends Controller
      */
     public function index()
     {
-        $cost_centers = FinancialDimension::where('use_value_from', 'Cost centers')->first()->financial_dimension_values;
-        $departments = FinancialDimension::where('use_value_from', 'Departments')->first()->financial_dimension_values;
-        $expense_purposes = FinancialDimension::where('use_value_from', 'Expense purposes')->first()->financial_dimension_values;
+        $cost_centers = FinancialDimension::where('use_value_from', 'Cost centers')->first()?->financial_dimension_values;
+        $departments = FinancialDimension::where('use_value_from', 'Departments')->first()?->financial_dimension_values;
+        $expense_purposes = FinancialDimension::where('use_value_from', 'Expense purposes')->first()?->financial_dimension_values;
         $clients = User::getClients();
 
         return view('vendor-payment-journals.index', [
@@ -95,9 +95,9 @@ class VendorPaymentJournalController extends Controller
     public function show($id)
     {
         $item = VendorPaymentJournal::withTrashed()->findOrFail($id);
-        $cost_centers = FinancialDimension::where('use_value_from', 'Cost centers')->first()->financial_dimension_values;
-        $departments = FinancialDimension::where('use_value_from', 'Departments')->first()->financial_dimension_values;
-        $expense_purposes = FinancialDimension::where('use_value_from', 'Expense purposes')->first()->financial_dimension_values;
+        $cost_centers = FinancialDimension::where('use_value_from', 'Cost centers')->first()?->financial_dimension_values;
+        $departments = FinancialDimension::where('use_value_from', 'Departments')->first()?->financial_dimension_values;
+        $expense_purposes = FinancialDimension::where('use_value_from', 'Expense purposes')->first()?->financial_dimension_values;
         $clients = User::getClients();
 
         return view('vendor-payment-journals.show', [

@@ -296,7 +296,7 @@ class CustomerPayment extends Model
 						'bank_account' => $this->bank_account ?? '---',
 						'issuing_bank_name' => $this->issuing_bank_branch_name,
 						'payment_specification' => $this->payment_specification ?? 'N/A',
-						'main_account' => MainAccount::first()->id,
+						'main_account' => MainAccount::first()?->id,
 						'account_type' => 'Customer',
 						'offset_account_type' => '---',
 						'offset_account' => $offset,

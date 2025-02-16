@@ -171,12 +171,12 @@ class VendorInvoiceFetchController extends Controller
         if ($id) {
             $item = VendorInvoice::withTrashed()->findOrFail($id);
 
-            $item->letter_credit = $item->purchase_order->credits->first()->amendment_number;
-            $item->letter_credit_issue_date = Carbon::parse($item->purchase_order->credits->first()->issue_date)->format('m-d-Y');
-            $item->boe = PurchasePromissoryNote::where('company_id', auth()->user()->company_id)->first()->bills_of_exchange;
-            $item->boe_issue_date = Carbon::parse(PurchasePromissoryNote::where('company_id', auth()->user()->company_id)->first()->issue_date)->format('m-d-Y');
-            $item->guarantee = $item->purchase_order->guarantees->first()->letter_of_guarantee_number;
-            $item->guarantee_date = Carbon::parse($item->purchase_order->guarantees->first()->issue_date)->format('m-d-Y');
+            $item->letter_credit = $item->purchase_order->credits->first()?->amendment_number;
+            $item->letter_credit_issue_date = Carbon::parse($item->purchase_order->credits->first()?->issue_date)->format('m-d-Y');
+            $item->boe = PurchasePromissoryNote::where('company_id', auth()->user()->company_id)->first()?->bills_of_exchange;
+            $item->boe_issue_date = Carbon::parse(PurchasePromissoryNote::where('company_id', auth()->user()->company_id)->first()?->issue_date)->format('m-d-Y');
+            $item->guarantee = $item->purchase_order->guarantees->first()?->letter_of_guarantee_number;
+            $item->guarantee_date = Carbon::parse($item->purchase_order->guarantees->first()?->issue_date)->format('m-d-Y');
             
             $item = $this->formatView($item);
             $purchase_order = $item->purchase_order;

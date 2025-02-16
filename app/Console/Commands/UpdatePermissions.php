@@ -31,6 +31,6 @@ class UpdatePermissions extends BaseCommand
             '--class' => 'PermissionsTableSeeder',
         ]);
 
-        Role::first()->syncPermissions(Permission::all());
+        Role::first()?->syncPermissions(Permission::all());
     }
 }
