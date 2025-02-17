@@ -162,7 +162,7 @@ class GeneralLedgerLineFetchController extends Controller
         $gl = GeneralLedger::find($request->id);
         
         // get distinct main account types
-        $types = $gl->ledger->chart_of_account->main_accounts->unique('main_account_type')->pluck('main_account_type');
+        $types = $types = $gl->ledger?->chart_of_account?->main_accounts->unique('main_account_type')->pluck('main_account_type');
 
         $query = $gl->general_ledger_lines->groupBy('main_account_relation.main_account_name')->map(function ($row) {
              return [ 
