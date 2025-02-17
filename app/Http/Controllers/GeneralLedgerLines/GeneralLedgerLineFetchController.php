@@ -176,7 +176,7 @@ class GeneralLedgerLineFetchController extends Controller
         });
 
         $stucture = [];
-        
+        $types = !empty($types) ? $types : [];
         foreach ($types as $key => $type) {
            $temps = $query->where('main_account_type', $type);
            array_push($stucture, ['row_type' => 'title', 'type' => $type]);
