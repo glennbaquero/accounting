@@ -5,7 +5,7 @@ namespace App\Models\Roles;
 use Spatie\Permission\Models\Role as SpatieRole;
 
 use Illuminate\Validation\ValidationException;
-use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\Models\Concerns\LogsActivity;
 
 use Laravel\Scout\Searchable;
 
