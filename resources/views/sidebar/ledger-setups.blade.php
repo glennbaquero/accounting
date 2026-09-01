@@ -12,6 +12,7 @@
 	'main-accounts.create-coa', 'main-accounts.show-coa', 'fiscal-periods.index' , 'fiscal-periods.create', 'fiscal-periods.show',
 	'account-structures.create-ledger', 'account-structures.show-ledger', 'account-structures.create-coa', 'account-structures.show-coa',
 	'document-code-controls.index' ,'document-code-controls.create','document-code-controls.show',
+	'fixed-assets.index', 'fixed-assets.create', 'fixed-assets.show',
 	'budgets.index', 'budgets.create', 'budgets.show',
     ]) }}">
 	<a href="javascript:void(0)" class="nav-link">
@@ -124,6 +125,12 @@
 		</li>
 
 		<li class="nav-item">
+		    <a href="{{ route('fixed-assets.index') }}" class="nav-link {{ $checker->route->areOnRoutes([
+		        'fixed-assets.index', 'fixed-assets.create', 'fixed-assets.show',
+		    ]) }}">
+		        <i class="nav-icon far fa-circle"></i>
+		        <p>
+		            Fixed Assets
 		    <a href="{{ route('budgets.index') }}" class="nav-link {{ $checker->route->areOnRoutes([
 		        'budgets.index', 'budgets.create', 'budgets.show',
 		    ]) }}">
