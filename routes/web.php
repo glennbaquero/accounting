@@ -1760,6 +1760,34 @@ Route::middleware(['auth:web'])->group(function() {
 
         });
 
+        //////////////////////////////
+        // Fixed Assets Controller //
+        //////////////////////////////
+        /**
+         *
+         */
+
+        Route::namespace('FixedAssets')->group(function() {
+
+            Route::get('fixed-assets', 'FixedAssetController@index')->name('fixed-assets.index');
+            Route::get('fixed-assets/create/{asset_id?}', 'FixedAssetController@create')->name('fixed-assets.create');
+            Route::post('fixed-assets/store/', 'FixedAssetController@store')->name('fixed-assets.store');
+            Route::get('fixed-assets/show/{id}', 'FixedAssetController@show')->name('fixed-assets.show');
+            Route::post('fixed-assets/update/{id}', 'FixedAssetController@update')->name('fixed-assets.update');
+            Route::post('fixed-assets/{id}/archive', 'FixedAssetController@archive')->name('fixed-assets.archive');
+            Route::post('fixed-assets/{id}/restore', 'FixedAssetController@restore')->name('fixed-assets.restore');
+            Route::post('fixed-assets/{id}/generate-schedule', 'FixedAssetController@generateSchedule')->name('fixed-assets.generate-schedule');
+            Route::post('fixed-assets/{id}/depreciation-lines/{lineId}/post', 'FixedAssetController@postDepreciationLine')->name('fixed-assets.post-depreciation-line');
+            Route::post('fixed-assets/{id}/post-all-due', 'FixedAssetController@postAllDue')->name('fixed-assets.post-all-due');
+            Route::post('fixed-assets/{id}/dispose', 'FixedAssetController@dispose')->name('fixed-assets.dispose');
+
+            Route::post('fixed-assets/fetch', 'FixedAssetFetchController@fetch')->name('fixed-assets.fetch');
+            Route::post('fixed-assets/fetch?archived=1', 'FixedAssetFetchController@fetch')->name('fixed-assets.fetch-archive');
+            Route::post('fixed-assets/fetch-item/{id?}', 'FixedAssetFetchController@fetchView')->name('fixed-assets.fetch-item');
+            Route::post('fixed-assets/fetch-pagination/{id}', 'FixedAssetFetchController@fetchPagePagination')->name('fixed-assets.fetch-pagination');
+
+        });
+
 
         //////////////////////////////
         // Account Structures Controller //

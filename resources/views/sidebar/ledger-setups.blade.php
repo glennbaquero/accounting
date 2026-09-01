@@ -10,8 +10,9 @@
 	'date-intervals.index' , 'date-intervals.create', 'date-intervals.show',
 	'financial-dimension-values.index' , 'financial-dimension-values.create', 'financial-dimension-values.show',
 	'main-accounts.create-coa', 'main-accounts.show-coa', 'fiscal-periods.index' , 'fiscal-periods.create', 'fiscal-periods.show',
-	'account-structures.create-ledger', 'account-structures.show-ledger', 'account-structures.create-coa', 'account-structures.show-coa',	
-	'document-code-controls.index' ,'document-code-controls.create','document-code-controls.show',		
+	'account-structures.create-ledger', 'account-structures.show-ledger', 'account-structures.create-coa', 'account-structures.show-coa',
+	'document-code-controls.index' ,'document-code-controls.create','document-code-controls.show',
+	'fixed-assets.index', 'fixed-assets.create', 'fixed-assets.show',
     ]) }}">
 	<a href="javascript:void(0)" class="nav-link">
 	    <i class="nav-icon fas fa-money-bill"></i>
@@ -118,6 +119,17 @@
 		        <i class="nav-icon far fa-circle"></i>
 		        <p>
 		            Fiscal Calendar
+		        </p>
+		    </a>
+		</li>
+
+		<li class="nav-item">
+		    <a href="{{ route('fixed-assets.index') }}" class="nav-link {{ $checker->route->areOnRoutes([
+		        'fixed-assets.index', 'fixed-assets.create', 'fixed-assets.show',
+		    ]) }}">
+		        <i class="nav-icon far fa-circle"></i>
+		        <p>
+		            Fixed Assets
 		        </p>
 		    </a>
 		</li>
