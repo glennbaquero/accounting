@@ -13,6 +13,7 @@
 	'account-structures.create-ledger', 'account-structures.show-ledger', 'account-structures.create-coa', 'account-structures.show-coa',
 	'document-code-controls.index' ,'document-code-controls.create','document-code-controls.show',
 	'fixed-assets.index', 'fixed-assets.create', 'fixed-assets.show',
+	'budgets.index', 'budgets.create', 'budgets.show',
     ]) }}">
 	<a href="javascript:void(0)" class="nav-link">
 	    <i class="nav-icon fas fa-money-bill"></i>
@@ -130,6 +131,12 @@
 		        <i class="nav-icon far fa-circle"></i>
 		        <p>
 		            Fixed Assets
+		    <a href="{{ route('budgets.index') }}" class="nav-link {{ $checker->route->areOnRoutes([
+		        'budgets.index', 'budgets.create', 'budgets.show',
+		    ]) }}">
+		        <i class="nav-icon far fa-circle"></i>
+		        <p>
+		            Budgets
 		        </p>
 		    </a>
 		</li>

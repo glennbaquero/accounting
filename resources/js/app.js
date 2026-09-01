@@ -245,6 +245,7 @@ Vue.component('ledger-calendar-table', require('./views/ledger-calendars/LedgerC
 
 Vue.component('fixed-asset-table', require('./views/fixed-assets/FixedAssetTable.vue').default);
 Vue.component('fixed-asset-view', require('./views/fixed-assets/FixedAssetView.vue').default);
+Vue.component('budget-table', require('./views/budgets/BudgetTable.vue').default);
 
 Vue.component('fiscal-calendar-table', require('./views/fiscal-calendars/FiscalCalendarTable.vue').default);
 
@@ -294,6 +295,8 @@ Vue.component('account-structure-view', require('./views/account-structures/Acco
 Vue.component('account-structure-ledger-view', require('./views/account-structures/AccountStructureLedgerView.vue').default);
 
 Vue.component('ledger-calendar-view', require('./views/ledger-calendars/LedgerCalendarView.vue').default);
+
+Vue.component('budget-view', require('./views/budgets/BudgetView.vue').default);
 
 Vue.component('account-structure-coa-view', require('./views/account-structures/AccountStructureCoaView.vue').default);
 

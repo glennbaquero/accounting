@@ -1763,9 +1763,6 @@ Route::middleware(['auth:web'])->group(function() {
         //////////////////////////////
         // Fixed Assets Controller //
         //////////////////////////////
-        /**
-         *
-         */
 
         Route::namespace('FixedAssets')->group(function() {
 
@@ -1785,6 +1782,30 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('fixed-assets/fetch?archived=1', 'FixedAssetFetchController@fetch')->name('fixed-assets.fetch-archive');
             Route::post('fixed-assets/fetch-item/{id?}', 'FixedAssetFetchController@fetchView')->name('fixed-assets.fetch-item');
             Route::post('fixed-assets/fetch-pagination/{id}', 'FixedAssetFetchController@fetchPagePagination')->name('fixed-assets.fetch-pagination');
+        });
+
+        //////////////////////////////
+        // Budgets Controller //
+        //////////////////////////////
+        /**
+         *
+         */
+
+        Route::namespace('Budgets')->group(function() {
+
+            Route::get('budgets', 'BudgetController@index')->name('budgets.index');
+            Route::get('budgets/create/{budget_id?}', 'BudgetController@create')->name('budgets.create');
+            Route::post('budgets/store/', 'BudgetController@store')->name('budgets.store');
+            Route::get('budgets/show/{id}', 'BudgetController@show')->name('budgets.show');
+            Route::post('budgets/update/{id}', 'BudgetController@update')->name('budgets.update');
+            Route::post('budgets/{id}/archive', 'BudgetController@archive')->name('budgets.archive');
+            Route::post('budgets/{id}/restore', 'BudgetController@restore')->name('budgets.restore');
+            Route::get('budgets/{id}/variance', 'BudgetController@variance')->name('budgets.variance');
+
+            Route::post('budgets/fetch', 'BudgetFetchController@fetch')->name('budgets.fetch');
+            Route::post('budgets/fetch?archived=1', 'BudgetFetchController@fetch')->name('budgets.fetch-archive');
+            Route::post('budgets/fetch-item/{id?}', 'BudgetFetchController@fetchView')->name('budgets.fetch-item');
+            Route::post('budgets/fetch-pagination/{id}', 'BudgetFetchController@fetchPagePagination')->name('budgets.fetch-pagination');
 
         });
 
