@@ -1785,6 +1785,33 @@ Route::middleware(['auth:web'])->group(function() {
         });
 
         //////////////////////////////
+        // Recurring Journal Templates Controller //
+        //////////////////////////////
+        /**
+         *
+         */
+
+        Route::namespace('RecurringJournalTemplates')->group(function() {
+
+            Route::get('recurring-journal-templates', 'RecurringJournalTemplateController@index')->name('recurring-journal-templates.index');
+            Route::get('recurring-journal-templates/create/{template_id?}', 'RecurringJournalTemplateController@create')->name('recurring-journal-templates.create');
+            Route::post('recurring-journal-templates/store/', 'RecurringJournalTemplateController@store')->name('recurring-journal-templates.store');
+            Route::get('recurring-journal-templates/show/{id}', 'RecurringJournalTemplateController@show')->name('recurring-journal-templates.show');
+            Route::post('recurring-journal-templates/update/{id}', 'RecurringJournalTemplateController@update')->name('recurring-journal-templates.update');
+            Route::post('recurring-journal-templates/{id}/archive', 'RecurringJournalTemplateController@archive')->name('recurring-journal-templates.archive');
+            Route::post('recurring-journal-templates/{id}/restore', 'RecurringJournalTemplateController@restore')->name('recurring-journal-templates.restore');
+            Route::post('recurring-journal-templates/{id}/pause', 'RecurringJournalTemplateController@pause')->name('recurring-journal-templates.pause');
+            Route::post('recurring-journal-templates/{id}/resume', 'RecurringJournalTemplateController@resume')->name('recurring-journal-templates.resume');
+            Route::post('recurring-journal-templates/{id}/run-now', 'RecurringJournalTemplateController@runNow')->name('recurring-journal-templates.run-now');
+
+            Route::post('recurring-journal-templates/fetch', 'RecurringJournalTemplateFetchController@fetch')->name('recurring-journal-templates.fetch');
+            Route::post('recurring-journal-templates/fetch?archived=1', 'RecurringJournalTemplateFetchController@fetch')->name('recurring-journal-templates.fetch-archive');
+            Route::post('recurring-journal-templates/fetch-item/{id?}', 'RecurringJournalTemplateFetchController@fetchView')->name('recurring-journal-templates.fetch-item');
+            Route::post('recurring-journal-templates/fetch-pagination/{id}', 'RecurringJournalTemplateFetchController@fetchPagePagination')->name('recurring-journal-templates.fetch-pagination');
+
+        });
+
+        //////////////////////////////
         // Budgets Controller //
         //////////////////////////////
         /**

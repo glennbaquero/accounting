@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         'App\Console\Commands\Install',
         'App\Console\Commands\SearchableRefresh',
-        'App\Console\Commands\UpdatePermissions'
+        'App\Console\Commands\UpdatePermissions',
+        'App\Console\Commands\GenerateRecurringJournals',
     ];
 
     /**
@@ -28,6 +29,10 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+
+        $schedule->command('journals:generate-recurring')
+                 ->daily()
+                 ->withoutOverlapping();
     }
 
     /**

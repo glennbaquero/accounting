@@ -5,6 +5,7 @@
 		'ledger-reasons.index' , 'ledger-reasons.create', 'ledger-reasons.show',
 		'general-ledgers.index' ,'general-ledgers.show', 'general-ledgers.create',
 		'accrual-postings.index' ,'accrual-postings.show', 'accrual-postings.create',
+		'recurring-journal-templates.index' ,'recurring-journal-templates.show', 'recurring-journal-templates.create',
 	]) }}">
 	<a href="javascript:void(0)" class="nav-link">
 	    <i class="nav-icon fas fa-scroll"></i>
@@ -52,6 +53,17 @@
 		        <i class="nav-icon far fa-circle"></i>
 		        <p>
 		            Accrual Posting
+		        </p>
+		    </a>
+		</li>
+
+		<li class="nav-item">
+		    <a href="{{ route('recurring-journal-templates.index') }}" class="nav-link {{ $checker->route->areOnRoutes([
+		         'recurring-journal-templates.index' ,'recurring-journal-templates.show', 'recurring-journal-templates.create',
+		    ]) }}">
+		        <i class="nav-icon far fa-circle"></i>
+		        <p>
+		            Recurring Journals
 		        </p>
 		    </a>
 		</li>
