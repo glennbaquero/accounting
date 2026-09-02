@@ -61,3 +61,7 @@ Thumbs.db
 
 public/mix-manifest.json
 public/assets/app.js
+.env.before_lerd
+.lerd.yaml
+.node-version
+.php-version

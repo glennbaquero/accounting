@@ -14,6 +14,7 @@ use App\Models\Invoices\PurchaseDeliveryReceiptLine;
 use App\Models\PurchaseOrders\PurchaseOrder;
 use Illuminate\Validation\ValidationException;
 use App\Models\Journals\InvoiceApprovalJournal;
+use App\Models\Invoices\VendorInvoice;
 use App\Http\Requests\Invoices\VendorInvoiceStoreRequest;
 use App\Models\LedgerSetups\DocumentCodeControls\DocumentCodeControl;
 use PDF;

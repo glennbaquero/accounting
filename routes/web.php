@@ -877,7 +877,7 @@ Route::middleware(['auth:web'])->group(function() {
         //////////////////////////////
         // Purchase Delivery Receipt Controller //
         //////////////////////////////
-        Route::namespace('PuchaseDeliveryReceipts')->group(function() {
+        Route::namespace('PurchaseDeliveryReceipts')->group(function() {
 
             Route::get('purchase-delivery-receipts', 'PurchaseDeliveryReceiptController@index')->name('purchase-delivery-receipts.index');
             Route::get('purchase-delivery-receipts/create/{id?}', 'PurchaseDeliveryReceiptController@create')->name('purchase-delivery-receipts.create');
@@ -894,10 +894,10 @@ Route::middleware(['auth:web'])->group(function() {
 
             Route::post('purchase-delivery-receipts/to-invoice/{id}', 'PurchaseDeliveryReceiptController@toInvoice')->name('purchase-delivery-receipts.to-invoice');
 
-            Route::post('purchase-delivery-receipts/fetch', 'PuchaseDeliveryReceiptFetchController@fetch')->name('purchase-delivery-receipts.fetch');
-            Route::post('purchase-delivery-receipts/fetch?archived=1', 'PuchaseDeliveryReceiptFetchController@fetch')->name('purchase-delivery-receipts.fetch-archive');
-            Route::post('purchase-delivery-receipts/fetch-item/{purchase_order_number?}/{id?}', 'PuchaseDeliveryReceiptFetchController@fetchView')->name('purchase-delivery-receipts.fetch-item');
-            Route::post('purchase-delivery-receipts/fetch-pagination/{id}', 'PuchaseDeliveryReceiptFetchController@fetchPagePagination')->name('purchase-delivery-receipts.fetch-pagination');
+            Route::post('purchase-delivery-receipts/fetch', 'PurchaseDeliveryReceiptFetchController@fetch')->name('purchase-delivery-receipts.fetch');
+            Route::post('purchase-delivery-receipts/fetch?archived=1', 'PurchaseDeliveryReceiptFetchController@fetch')->name('purchase-delivery-receipts.fetch-archive');
+            Route::post('purchase-delivery-receipts/fetch-item/{purchase_order_number?}/{id?}', 'PurchaseDeliveryReceiptFetchController@fetchView')->name('purchase-delivery-receipts.fetch-item');
+            Route::post('purchase-delivery-receipts/fetch-pagination/{id}', 'PurchaseDeliveryReceiptFetchController@fetchPagePagination')->name('purchase-delivery-receipts.fetch-pagination');
 
         });
 
