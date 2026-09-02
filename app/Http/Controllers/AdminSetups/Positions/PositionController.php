@@ -42,6 +42,8 @@ class PositionController extends Controller
      */
     public function store(PositionStoreRequest $request)
     {
+        $request['active_from'] = now(); 
+        $request['active_to'] = now(); 
         $item = Position::store($request);
 
         $message = "You have successfully created {$item->name}";

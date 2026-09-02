@@ -877,7 +877,7 @@ Route::middleware(['auth:web'])->group(function() {
         //////////////////////////////
         // Purchase Delivery Receipt Controller //
         //////////////////////////////
-        Route::namespace('PuchaseDeliveryReceipts')->group(function() {
+        Route::namespace('PurchaseDeliveryReceipts')->group(function() {
 
             Route::get('purchase-delivery-receipts', 'PurchaseDeliveryReceiptController@index')->name('purchase-delivery-receipts.index');
             Route::get('purchase-delivery-receipts/create/{id?}', 'PurchaseDeliveryReceiptController@create')->name('purchase-delivery-receipts.create');
@@ -894,10 +894,10 @@ Route::middleware(['auth:web'])->group(function() {
 
             Route::post('purchase-delivery-receipts/to-invoice/{id}', 'PurchaseDeliveryReceiptController@toInvoice')->name('purchase-delivery-receipts.to-invoice');
 
-            Route::post('purchase-delivery-receipts/fetch', 'PuchaseDeliveryReceiptFetchController@fetch')->name('purchase-delivery-receipts.fetch');
-            Route::post('purchase-delivery-receipts/fetch?archived=1', 'PuchaseDeliveryReceiptFetchController@fetch')->name('purchase-delivery-receipts.fetch-archive');
-            Route::post('purchase-delivery-receipts/fetch-item/{purchase_order_number?}/{id?}', 'PuchaseDeliveryReceiptFetchController@fetchView')->name('purchase-delivery-receipts.fetch-item');
-            Route::post('purchase-delivery-receipts/fetch-pagination/{id}', 'PuchaseDeliveryReceiptFetchController@fetchPagePagination')->name('purchase-delivery-receipts.fetch-pagination');
+            Route::post('purchase-delivery-receipts/fetch', 'PurchaseDeliveryReceiptFetchController@fetch')->name('purchase-delivery-receipts.fetch');
+            Route::post('purchase-delivery-receipts/fetch?archived=1', 'PurchaseDeliveryReceiptFetchController@fetch')->name('purchase-delivery-receipts.fetch-archive');
+            Route::post('purchase-delivery-receipts/fetch-item/{purchase_order_number?}/{id?}', 'PurchaseDeliveryReceiptFetchController@fetchView')->name('purchase-delivery-receipts.fetch-item');
+            Route::post('purchase-delivery-receipts/fetch-pagination/{id}', 'PurchaseDeliveryReceiptFetchController@fetchPagePagination')->name('purchase-delivery-receipts.fetch-pagination');
 
         });
 
@@ -1782,6 +1782,33 @@ Route::middleware(['auth:web'])->group(function() {
             Route::post('fixed-assets/fetch?archived=1', 'FixedAssetFetchController@fetch')->name('fixed-assets.fetch-archive');
             Route::post('fixed-assets/fetch-item/{id?}', 'FixedAssetFetchController@fetchView')->name('fixed-assets.fetch-item');
             Route::post('fixed-assets/fetch-pagination/{id}', 'FixedAssetFetchController@fetchPagePagination')->name('fixed-assets.fetch-pagination');
+        });
+
+        //////////////////////////////
+        // Recurring Journal Templates Controller //
+        //////////////////////////////
+        /**
+         *
+         */
+
+        Route::namespace('RecurringJournalTemplates')->group(function() {
+
+            Route::get('recurring-journal-templates', 'RecurringJournalTemplateController@index')->name('recurring-journal-templates.index');
+            Route::get('recurring-journal-templates/create/{template_id?}', 'RecurringJournalTemplateController@create')->name('recurring-journal-templates.create');
+            Route::post('recurring-journal-templates/store/', 'RecurringJournalTemplateController@store')->name('recurring-journal-templates.store');
+            Route::get('recurring-journal-templates/show/{id}', 'RecurringJournalTemplateController@show')->name('recurring-journal-templates.show');
+            Route::post('recurring-journal-templates/update/{id}', 'RecurringJournalTemplateController@update')->name('recurring-journal-templates.update');
+            Route::post('recurring-journal-templates/{id}/archive', 'RecurringJournalTemplateController@archive')->name('recurring-journal-templates.archive');
+            Route::post('recurring-journal-templates/{id}/restore', 'RecurringJournalTemplateController@restore')->name('recurring-journal-templates.restore');
+            Route::post('recurring-journal-templates/{id}/pause', 'RecurringJournalTemplateController@pause')->name('recurring-journal-templates.pause');
+            Route::post('recurring-journal-templates/{id}/resume', 'RecurringJournalTemplateController@resume')->name('recurring-journal-templates.resume');
+            Route::post('recurring-journal-templates/{id}/run-now', 'RecurringJournalTemplateController@runNow')->name('recurring-journal-templates.run-now');
+
+            Route::post('recurring-journal-templates/fetch', 'RecurringJournalTemplateFetchController@fetch')->name('recurring-journal-templates.fetch');
+            Route::post('recurring-journal-templates/fetch?archived=1', 'RecurringJournalTemplateFetchController@fetch')->name('recurring-journal-templates.fetch-archive');
+            Route::post('recurring-journal-templates/fetch-item/{id?}', 'RecurringJournalTemplateFetchController@fetchView')->name('recurring-journal-templates.fetch-item');
+            Route::post('recurring-journal-templates/fetch-pagination/{id}', 'RecurringJournalTemplateFetchController@fetchPagePagination')->name('recurring-journal-templates.fetch-pagination');
+
         });
 
         //////////////////////////////

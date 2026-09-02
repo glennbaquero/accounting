@@ -131,6 +131,8 @@
 		        <i class="nav-icon far fa-circle"></i>
 		        <p>
 		            Fixed Assets
+				</p>
+			</a>
 		    <a href="{{ route('budgets.index') }}" class="nav-link {{ $checker->route->areOnRoutes([
 		        'budgets.index', 'budgets.create', 'budgets.show',
 		    ]) }}">
