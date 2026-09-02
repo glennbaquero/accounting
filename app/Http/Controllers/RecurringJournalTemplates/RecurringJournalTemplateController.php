@@ -10,6 +10,8 @@ use App\Http\Requests\RecurringJournalTemplates\RecurringJournalTemplateStoreReq
 use App\Models\RecurringJournalTemplates\RecurringJournalTemplate;
 use App\Models\RecurringJournalTemplateLines\RecurringJournalTemplateLine;
 
+use App\Models\Users\User;
+
 class RecurringJournalTemplateController extends Controller
 {
     /**
@@ -31,10 +33,12 @@ class RecurringJournalTemplateController extends Controller
      */
     public function create()
     {
+        $clients = User::getClients();
         $count = RecurringJournalTemplate::withTrashed()->count() + 1;
         $template_id = 'RJT-' . str_pad($count, 4, '0', STR_PAD_LEFT);
 
         return view('recurring-journal-templates.create', [
+            'clients' => $clients,
             'template_id' => $template_id,
         ]);
     }
